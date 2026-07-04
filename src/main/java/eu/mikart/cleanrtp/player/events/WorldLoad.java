@@ -1,13 +1,13 @@
 package eu.mikart.cleanrtp.player.events;
 
-import com.tcoded.folialib.wrapper.task.WrappedTask;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.event.world.WorldLoadEvent;
 
 public class WorldLoad {
 
-    WrappedTask loader;
+    ScheduledTask loader;
 
     void load(WorldLoadEvent e) {
         //BetterRTP.getInstance().getLogger().info("NEW WORLD!");

@@ -2,7 +2,6 @@ package eu.mikart.cleanrtp.player.commands;
 
 import eu.mikart.cleanrtp.player.commands.types.*;
 import lombok.Getter;
-import me.superronancraft.betterrtp.player.commands.types.*;
 
 @Getter
 public enum RTPCommandType {

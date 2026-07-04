@@ -32,7 +32,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.42")
 
     implementation("xyz.xenondevs:particle:1.8.4")
-    implementation("com.github.TechnicallyCoded:FoliaLib:0.4.3")
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
 }
 

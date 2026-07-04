@@ -50,7 +50,7 @@ public class DatabaseChunkData extends SQLite {
                     + COLUMNS.BIOME.name + ", "
                     + COLUMNS.MAX_Y.name + " "
                     + ") VALUES(?, ?, ?, ?, ?)";
-            List<Object> params = new ArrayList<Object>() {{
+            List<Object> params = new ArrayList<>() {{
                 add(chunk.getWorld().getName());
                 add(chunk.getX());
                 add(chunk.getZ());

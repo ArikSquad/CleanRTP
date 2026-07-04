@@ -1,9 +1,9 @@
 package eu.mikart.cleanrtp.player.rtp;
 
-import com.tcoded.folialib.wrapper.task.WrappedTask;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.events.custom.RtpCancelledEvent;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,7 +14,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 class RTPDelay implements Listener {
-    private WrappedTask task;
+    private ScheduledTask task;
     private final boolean cancelOnMove, cancelOnDamage;
     private final RTPPlayer rtp;
 

@@ -4,12 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
-
-import com.tcoded.folialib.wrapper.task.WrappedTask;
 
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.commands.RtpSetupType;
@@ -27,7 +26,7 @@ public class QueueGenerator {
     public static final int queueMax = 32, queueMin = 2; //Amount to ready up for each rtp world
     private final int queueMaxAttempts = 50;
     boolean generating;
-    private WrappedTask task;
+    private ScheduledTask task;
 
     public void unload() {
         if (task != null)

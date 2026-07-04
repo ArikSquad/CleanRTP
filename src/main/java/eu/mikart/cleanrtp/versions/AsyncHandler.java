@@ -1,37 +1,32 @@
 package eu.mikart.cleanrtp.versions;
 
-import com.tcoded.folialib.impl.ServerImplementation;
-import com.tcoded.folialib.wrapper.task.WrappedTask;
 import eu.mikart.cleanrtp.BetterRTP;
+import eu.mikart.cleanrtp.references.database.SQLite;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+
+import java.util.concurrent.TimeUnit;
 
 public class AsyncHandler {
 
     public static void async(Runnable runnable) {
-        getFolia().runAsync(task -> runnable.run());
-        //Bukkit.getScheduler().runTaskAsynchronously(BetterRTP.getInstance(), runnable);
+        Bukkit.getAsyncScheduler().runNow(BetterRTP.getInstance(), _ -> runnable.run());
     }
 
     public static void sync(Runnable runnable) {
-        getFolia().runNextTick(task -> runnable.run());
-        //Bukkit.getScheduler().runTask(BetterRTP.getInstance(), runnable);
+        Bukkit.getGlobalRegionScheduler().run(BetterRTP.getInstance(), _ -> runnable.run());
     }
 
     public static void syncAtEntity(Entity entity, Runnable runnable) {
-        getFolia().runAtEntity(entity, task -> runnable.run());
-        //Bukkit.getScheduler().runTask(BetterRTP.getInstance(), runnable);
+        entity.getScheduler().run(BetterRTP.getInstance(), _ -> runnable.run(), null);
     }
 
-    public static WrappedTask asyncLater(Runnable runnable, long ticks) {
-        return getFolia().runLaterAsync(runnable, ticks);
-        //return Bukkit.getScheduler().runTaskLaterAsynchronously(BetterRTP.getInstance(), runnable, ticks);
-    }
-    public static WrappedTask syncLater(Runnable runnable, long ticks) {
-        return getFolia().runLater(runnable, ticks);
-        //return Bukkit.getScheduler().runTaskLater(BetterRTP.getInstance(), runnable, ticks);
+    public static ScheduledTask asyncLater(Runnable runnable, long ticks) {
+        return Bukkit.getAsyncScheduler().runDelayed(BetterRTP.getInstance(), _ -> runnable.run(), ticks * 50L, TimeUnit.MILLISECONDS);
     }
 
-    private static ServerImplementation getFolia() {
-        return BetterRTP.getInstance().getFoliaHandler().get();
+    public static ScheduledTask syncLater(Runnable runnable, long ticks) {
+        return Bukkit.getGlobalRegionScheduler().runDelayed(BetterRTP.getInstance(), _ -> runnable.run(), ticks);
     }
 }
