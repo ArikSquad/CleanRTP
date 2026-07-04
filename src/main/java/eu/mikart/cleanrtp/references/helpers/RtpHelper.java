@@ -21,7 +21,6 @@ import eu.mikart.cleanrtp.player.rtp.RtpErrorRequestReason;
 import eu.mikart.cleanrtp.player.rtp.RtpPlayerInfo;
 import eu.mikart.cleanrtp.player.rtp.RtpType;
 import eu.mikart.cleanrtp.references.PermissionCheck;
-import eu.mikart.cleanrtp.references.WarningHandler;
 import eu.mikart.cleanrtp.references.messages.Message;
 import eu.mikart.cleanrtp.references.messages.RtpMessage;
 import eu.mikart.cleanrtp.references.messages.placeholder.PlaceholderAnalyzer;
@@ -162,10 +161,6 @@ public class RtpHelper {
                 setup_info.setLocation(worldLocation);
                 setup_info.setWorld(worldLocation.getWorld());
             }
-            if (setup_info.getLocation() == null && BetterRTP.getInstance().getSettings().getGeneral().isDebug())
-                WarningHandler.warn(WarningHandler.WARNING.USELOCATION_ENABLED_NO_LOCATION_AVAILABLE,
-                        "This is not an error! UseLocationIfAvailable is set to `true`, but no location was found for "
-                                + setup_info.getSender().getName() + "! Using world defaults! (Maybe they dont have permission?)");
         }
         //Location
         if (setup_info.getLocation() != null) {
@@ -207,14 +202,11 @@ public class RtpHelper {
     public static WorldType getWorldType(World world) {
         WorldType world_type;
         RTP rtp = BetterRTP.getInstance().getRTP();
-        if (rtp.world_type.containsKey(world.getName()))
-            world_type = rtp.world_type.get(world.getName());
+        if (rtp.worldType.containsKey(world.getName()))
+            world_type = rtp.worldType.get(world.getName());
         else {
             world_type = WorldType.NORMAL;
-            rtp.world_type.put(world.getName(), world_type); //Defaults this so the error message isn't spammed
-            WarningHandler.warn(WarningHandler.WARNING.NO_WorldType_DECLARED, "Seems like the world `" + world.getName() + "` does not have a `WorldType` declared. " +
-                    "Please add/fix this in the config.yml file! This world will be treated as an overworld! " +
-                    "If this world is a nether world, configure it to NETHER (example: `- " + world.getName() + ": NETHER`", false);
+            rtp.worldType.put(world.getName(), world_type); //Defaults this so the error message isn't spammed
         }
         return world_type;
     }

@@ -7,7 +7,6 @@ import eu.mikart.cleanrtp.player.events.EventListener;
 import eu.mikart.cleanrtp.player.rtp.RTP;
 import eu.mikart.cleanrtp.references.Permissions;
 import eu.mikart.cleanrtp.references.RTPLogger;
-import eu.mikart.cleanrtp.references.WarningHandler;
 import eu.mikart.cleanrtp.references.database.DatabaseHandler;
 import eu.mikart.cleanrtp.references.depends.DepEconomy;
 import eu.mikart.cleanrtp.references.depends.DepMiniPlaceholders;
@@ -34,7 +33,6 @@ public class BetterRTP extends JavaPlugin {
     @Getter private final CooldownHandler cooldowns = new CooldownHandler();
     @Getter private final QueueHandler queue = new QueueHandler();
     @Getter private final DatabaseHandler databaseHandler = new DatabaseHandler();
-    @Getter private final WarningHandler warningHandler = new WarningHandler();
     private Runnable unregisterMiniPlaceholders = () -> {};
     @Getter private final RTPLogger rtpLogger = new RTPLogger();
 

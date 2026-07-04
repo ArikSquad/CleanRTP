@@ -65,7 +65,7 @@ public class RTPPlayer {
                 AsyncHandler.sync(() -> {
                     try { //Prior to 1.12 this async chunk will NOT work
                         CompletableFuture<Chunk> chunk = loc.getWorld().getChunkAtAsync(loc);
-                        chunk.thenAccept(result -> {
+                        chunk.thenAccept(_ -> {
                             //BetterRTP.debug("Checking location for " + p.getName());
                             attempt(sendi, loc);
                         });

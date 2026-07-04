@@ -26,7 +26,7 @@ public class RTP {
     @Getter List<String> disabledWorlds, blockList;
     int maxAttempts, delayTime;
     boolean cancelOnMove, cancelOnDamage;
-    public final HashMap<String, WorldType> world_type = new HashMap<>();
+    public final HashMap<String, WorldType> worldType = new HashMap<>();
     //Worlds
     @Getter private final WorldDefault RTPdefaultWorld = new WorldDefault();
     @Getter private final HashMap<String, RTPWorld> RTPcustomWorld = new HashMap<>();
@@ -44,7 +44,7 @@ public class RTP {
         //Overrides
         RTPLoader.loadOverrides(overriden);
         //WorldType
-        RTPLoader.loadWorldTypes(world_type);
+        RTPLoader.loadWorldTypes(worldType);
         //Worlds & CustomWorlds
         loadWorlds();
         //Locations
