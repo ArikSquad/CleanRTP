@@ -1,6 +1,5 @@
-<p align="center">
-  <b><a>This project is based on the work of [RonanPlugins/BetterRTP](https://github.com/RonanPlugins/BetterRTP).</a></b>
-</p>
+> [!NOTE] 
+> This project is based on the work of [RonanPlugins/BetterRTP](https://github.com/RonanPlugins/BetterRTP).
 
 ## What has been changed?
 
