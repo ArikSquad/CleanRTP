@@ -2,7 +2,6 @@ package eu.mikart.cleanrtp.references;
 
 import lombok.Getter;
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.file.FileOther;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,8 +18,8 @@ public class RTPLogger {
     //private ConsoleHandler consoleHandler_rtp, consoleHandler_logger;
 
     public void setup(BetterRTP plugin) {
-        FileOther.Filetype config = plugin.getFiles().getType(FileOther.Filetype.CONFIG);
-        boolean enabled = config.getBoolean("Settings.Logger.Enabled");
+        var config = plugin.getSettings().getGeneral().getLogger();
+        boolean enabled = config.isEnabled();
         Logger logger = plugin.getLogger();
         logger.setUseParentHandlers(true);
         if (handler != null) {
@@ -28,8 +27,8 @@ public class RTPLogger {
             handler.close();
         }
         if (!enabled) return;
-        this.format = config.getString("Settings.Logger.Format");
-        boolean toConsole = config.getBoolean("Settings.Logger.LogToConsole");
+        this.format = config.getFormat();
+        boolean toConsole = config.isLogToConsole();
         try {
             this.file = new File(plugin.getDataFolder() + File.separator + "log.txt");
             Files.deleteIfExists(file.toPath());

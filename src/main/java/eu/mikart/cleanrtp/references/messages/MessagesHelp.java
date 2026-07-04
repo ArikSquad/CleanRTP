@@ -1,7 +1,5 @@
 package eu.mikart.cleanrtp.references.messages;
 
-import eu.mikart.cleanrtp.references.file.FileData;
-
 public enum MessagesHelp implements MessageData {
 
     PREFIX("Prefix"),
@@ -28,11 +26,6 @@ public enum MessagesHelp implements MessageData {
     @Override
     public String prefix() {
         return "Help.";
-    }
-
-    @Override
-    public FileData file() {
-        return RtpMessage.getLang();
     }
 
     @Override

@@ -21,9 +21,9 @@ public class Join {
 
     //RTP on first join
     private static void rtpOnFirstJoin(Player p) {
-        if (getPl().getSettings().isRtpOnFirstJoin_Enabled() && !p.hasPlayedBefore())
+        if (getPl().getSettings().getGeneral().getRtpOnFirstJoin().isEnabled() && !p.hasPlayedBefore())
             RtpHelper.tp(p, Bukkit.getConsoleSender(),
-                    Bukkit.getWorld(getPl().getSettings().getRtpOnFirstJoin_World()),
+                    Bukkit.getWorld(getPl().getSettings().getGeneral().getRtpOnFirstJoin().getWorld()),
                     null, RtpType.JOIN, true, true);
         //Fixed via @kazigk on Github
     }

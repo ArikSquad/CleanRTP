@@ -51,15 +51,15 @@ public class RTPTeleport {
                     afterTeleport(p, loc, wPlayer, attempts, oldLoc, type);
                     if (sendi != p) //Tell player who requested that the player rtp'd
                         sendSuccessMsg(sendi, p.getName(), loc, wPlayer, false, attempts);
-                    getPl().getPInfo().getRtping().remove(p); //No longer rtp'ing
+                    getPl().getPInfo().getCurrentRtp().remove(p); //No longer rtp'ing
                     //Save respawn location if first join
                     if (type == RtpType.JOIN) //RTP Type was Join
-                        if (BetterRTP.getInstance().getSettings().isRtpOnFirstJoin_SetAsRespawn()) //Save as respawn is enabled
+                        if (BetterRTP.getInstance().getSettings().getGeneral().getRtpOnFirstJoin().isEnabled()) //Save as respawn is enabled
                             p.setBedSpawnLocation(loc, true); //True means to force a respawn even without a valid bed
                 }
             });
         } catch (Exception e) {
-            getPl().getPInfo().getRtping().remove(p); //No longer rtp'ing (errored)
+            getPl().getPInfo().getCurrentRtp().remove(p); //No longer rtp'ing (errored)
             e.printStackTrace();
         }
     }
@@ -71,8 +71,8 @@ public class RTPTeleport {
         effects.getSounds().playTeleport(p);
         effects.getParticles().display(p);
         effects.getPotions().giveEffects(p);
-        effects.getTitles().showTitle(RtpEffectTitles.RTP_TITLE_TYPE.TELEPORT, p, loc, attempts, 0);
-        if (effects.getTitles().sendMsg(RtpEffectTitles.RTP_TITLE_TYPE.TELEPORT))
+        effects.getTitles().showTitle(RtpEffectTitles.RtpTitleType.TELEPORT, p, loc, attempts, 0);
+        if (effects.getTitles().sendMsg(RtpEffectTitles.RtpTitleType.TELEPORT))
             sendSuccessMsg(p, p.getName(), loc, wPlayer, true, attempts);
         getPl().getServer().getPluginManager().callEvent(new RtpTeleportPostEvent(p, loc, oldLoc, wPlayer, type));
     }
@@ -82,8 +82,8 @@ public class RTPTeleport {
         getPl().getServer().getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             effects.getSounds().playDelay(p);
-            effects.getTitles().showTitle(RtpEffectTitles.RTP_TITLE_TYPE.NODELAY, p, p.getLocation(), 0, 0);
-            if (effects.getTitles().sendMsg(RtpEffectTitles.RTP_TITLE_TYPE.NODELAY))
+            effects.getTitles().showTitle(RtpEffectTitles.RtpTitleType.NODELAY, p, p.getLocation(), 0, 0);
+            if (effects.getTitles().sendMsg(RtpEffectTitles.RtpTitleType.NODELAY))
                 MessagesCore.SUCCESS_TELEPORT.send(sendi);
         }
         return event.isCancelled();
@@ -94,22 +94,22 @@ public class RTPTeleport {
         getPl().getServer().getPluginManager().callEvent(event);
         if (!event.isCancelled()) {
             effects.getSounds().playDelay(p);
-            effects.getTitles().showTitle(RtpEffectTitles.RTP_TITLE_TYPE.DELAY, p, p.getLocation(), 0, delay);
-            if (effects.getTitles().sendMsg(RtpEffectTitles.RTP_TITLE_TYPE.DELAY))
+            effects.getTitles().showTitle(RtpEffectTitles.RtpTitleType.DELAY, p, p.getLocation(), 0, delay);
+            if (effects.getTitles().sendMsg(RtpEffectTitles.RtpTitleType.DELAY))
                 MessagesCore.DELAY.send(p, delay);
         }
         return event.isCancelled();
     }
 
     public void cancelledTeleport(Player p) { //Only Delays should call this
-        effects.getTitles().showTitle(RtpEffectTitles.RTP_TITLE_TYPE.CANCEL, p, p.getLocation(), 0, 0);
-        if (effects.getTitles().sendMsg(RtpEffectTitles.RTP_TITLE_TYPE.CANCEL))
+        effects.getTitles().showTitle(RtpEffectTitles.RtpTitleType.CANCEL, p, p.getLocation(), 0, 0);
+        if (effects.getTitles().sendMsg(RtpEffectTitles.RtpTitleType.CANCEL))
             MessagesCore.MOVED.send(p);
     }
 
     private void loadingTeleport(Player p, CommandSender sendi) {
-        effects.getTitles().showTitle(RtpEffectTitles.RTP_TITLE_TYPE.LOADING, p, p.getLocation(), 0, 0);
-        if (effects.getTitles().sendMsg(RtpEffectTitles.RTP_TITLE_TYPE.LOADING) && sendStatusMessage()) { //Show msg if enabled or if not same player
+        effects.getTitles().showTitle(RtpEffectTitles.RtpTitleType.LOADING, p, p.getLocation(), 0, 0);
+        if (effects.getTitles().sendMsg(RtpEffectTitles.RtpTitleType.LOADING) && sendStatusMessage()) { //Show msg if enabled or if not same player
             if (p == sendi)
                 MessagesCore.SUCCESS_LOADING.send(sendi);
             MessagesCore.SUCCESS_LOADING.send(p);
@@ -117,8 +117,8 @@ public class RTPTeleport {
     }
 
     public void failedTeleport(Player p, CommandSender sendi) {
-        effects.getTitles().showTitle(RtpEffectTitles.RTP_TITLE_TYPE.FAILED, p, p.getLocation(), 0, 0);
-        if (effects.getTitles().sendMsg(RtpEffectTitles.RTP_TITLE_TYPE.FAILED))
+        effects.getTitles().showTitle(RtpEffectTitles.RtpTitleType.FAILED, p, p.getLocation(), 0, 0);
+        if (effects.getTitles().sendMsg(RtpEffectTitles.RtpTitleType.FAILED))
             if (p == sendi)
                 MessagesCore.FAILED_NOTSAFE.send(p, BetterRTP.getInstance().getRTP().maxAttempts);
             else
@@ -152,7 +152,7 @@ public class RTPTeleport {
     }
 
     private boolean sendStatusMessage() {
-        return getPl().getSettings().isStatusMessages();
+        return getPl().getSettings().getGeneral().isStatusMessages();
     }
 
     private BetterRTP getPl() {

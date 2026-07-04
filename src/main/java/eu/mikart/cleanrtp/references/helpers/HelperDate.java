@@ -1,7 +1,7 @@
 package eu.mikart.cleanrtp.references.helpers;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.settings.Settings;
+import eu.mikart.cleanrtp.config.Settings;
 
 import java.util.Calendar;
 import java.util.Date;

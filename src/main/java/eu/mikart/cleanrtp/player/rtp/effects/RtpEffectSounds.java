@@ -4,8 +4,8 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import eu.mikart.cleanrtp.BetterRTP;
+import eu.mikart.cleanrtp.config.Settings;
 import eu.mikart.cleanrtp.player.rtp.packets.WrapperPlayServerNamedSoundEffect;
-import eu.mikart.cleanrtp.references.file.FileOther;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -16,11 +16,11 @@ public class RtpEffectSounds {
     private String soundTeleport, soundDelay;
 
     void load() {
-        FileOther.Filetype config = FileOther.Filetype.EFFECTS;
-        enabled = config.getBoolean("Sounds.Enabled");
+        Settings.Effects config = BetterRTP.getInstance().getSettings().getGeneral().getEffects();
+        enabled = config.isSounds();
         if (enabled) {
-            soundTeleport = config.getString("Sounds.Success");
-            soundDelay = config.getString("Sounds.Delay");
+            soundTeleport = config.getSuccessSound();
+            soundDelay = config.getDelaySound();
         }
     }
 

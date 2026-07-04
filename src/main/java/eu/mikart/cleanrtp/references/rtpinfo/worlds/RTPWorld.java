@@ -20,7 +20,7 @@ public interface RTPWorld {
 
     int getMinRadius();
 
-    int getPrice();
+    float getPrice();
 
     List<String> getBiomes();
 
@@ -38,6 +38,4 @@ public interface RTPWorld {
     }
 
     long getCooldown();
-
-    boolean getRTPOnDeath();
 }

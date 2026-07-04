@@ -116,7 +116,7 @@ public class CmdPlayer implements RTPCommand, RTPCommandHelpable {
     }
 
     @Override
-    public String getHelp() {
-        return MessagesHelp.PLAYER.get();
+    public net.kyori.adventure.text.ComponentLike getHelp(org.bukkit.command.CommandSender sender, String label) {
+        return eu.mikart.cleanrtp.references.messages.Message.translatableRaw(sender, MessagesHelp.PLAYER.key(), label);
     }
 }

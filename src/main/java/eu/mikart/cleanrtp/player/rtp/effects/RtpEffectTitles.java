@@ -1,7 +1,9 @@
 package eu.mikart.cleanrtp.player.rtp.effects;
 
-import eu.mikart.cleanrtp.references.file.FileOther;
+import eu.mikart.cleanrtp.BetterRTP;
+import eu.mikart.cleanrtp.config.Settings;
 import eu.mikart.cleanrtp.references.messages.Message;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -10,18 +12,17 @@ import java.util.HashMap;
 public class RtpEffectTitles {
 
     boolean enabled = false;
-    private final HashMap<RTP_TITLE_TYPE, RTP_TITLE> titles = new HashMap<>();
+    private final HashMap<RtpTitleType, RtpTitle> titles = new HashMap<>();
 
     void load() {
         titles.clear();
-        FileOther.Filetype config = FileOther.Filetype.EFFECTS;
-        enabled = config.getBoolean("Titles.Enabled");
+        enabled = BetterRTP.getInstance().getSettings().getGeneral().getTitles().enabled;
         if (enabled)
-            for (RTP_TITLE_TYPE type : RTP_TITLE_TYPE.values())
-                titles.put(type, new RTP_TITLE(type.path));
+            for (RtpTitleType type : RtpTitleType.values())
+                titles.put(type, new RtpTitle(type.path));
     }
 
-    public void showTitle(RTP_TITLE_TYPE type, Player p, Location loc, int attempts, int delay) {
+    public void showTitle(RtpTitleType type, Player p, Location loc, int attempts, int delay) {
         if (titles.containsKey(type)) {
             String title = getPlaceholders(titles.get(type).title, p, loc, attempts, delay);
             String sub = getPlaceholders(titles.get(type).subTitle, p, loc, attempts, delay);
@@ -29,8 +30,8 @@ public class RtpEffectTitles {
         }
     }
 
-    public boolean sendMsg(RTP_TITLE_TYPE type) {
-        return titles.containsKey(type) && titles.get(type).send_message || !enabled;
+    public boolean sendMsg(RtpTitleType type) {
+        return titles.containsKey(type) && titles.get(type).shouldSendMessage || !enabled;
     }
 
     private String getPlaceholders(String str, Player p, Location loc, int attempts, int delay) {
@@ -43,33 +44,25 @@ public class RtpEffectTitles {
     }
 
     private void show(Player p, String title, String sub) {
-        // int fadeIn = getPl().text.getFadeIn();
-        // int stay = text.getStay();
-        // int fadeOut = text.getFadeOut();
-        title = Message.color(title);
-        sub = Message.color(sub);
-        //Message.smsTitle(p, Arrays.asList(title, sub));
-        p.sendTitle(title, sub);
-        // player.sendTitle(title, subTitle, fadeIn, stay, fadeOut);
+        p.showTitle(Title.title(Message.component(title, p), Message.component(sub, p)));
     }
 
-    public enum RTP_TITLE_TYPE {
+    public enum RtpTitleType {
         NODELAY("NoDelay"), TELEPORT("Teleport"), DELAY("Delay"), CANCEL("Cancelled"), LOADING("Loading"), FAILED("Failed");
         final String path;
-        RTP_TITLE_TYPE(String path) {
+        RtpTitleType(String path) {
             this.path = path;
         }
     }
 
-    private static class RTP_TITLE {
+    private static class RtpTitle {
         String title, subTitle;
-        boolean send_message;
+        boolean shouldSendMessage;
 
-        RTP_TITLE(String path) {
-            FileOther.Filetype config = FileOther.Filetype.EFFECTS;
-            title = config.getString("Titles." + path + ".Title");
-            subTitle = config.getString("Titles." + path + ".Subtitle");
-            send_message = config.getBoolean("Titles." + path + ".SendMessage");
+        RtpTitle(Settings.GeneralSettings.TitleMessage titleMessage) {
+            title = titleMessage.title;
+            subTitle = titleMessage.subtitle;
+            shouldSendMessage = titleMessage.sendMessage;
         }
 
     }

@@ -1,136 +1,191 @@
 package eu.mikart.cleanrtp.references.messages.placeholder;
 
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Biome;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.commands.RTPCommand;
 import eu.mikart.cleanrtp.references.PermissionCheck;
 import eu.mikart.cleanrtp.references.PermissionNode;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldPlayer;
-import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.minimessage.translation.Argument;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Biome;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class PlaceholderAnalyzer {
 
-    public static String applyPlaceholders(CommandSender p, String str, Object info) {
-        if (info instanceof String)
-            str = string(str, (String) info);
-        if (info instanceof Player)
-            str = player(str, (Player) info);
-        if (info instanceof Location)
-            str = location(str, (Location) info);
-        if (info instanceof Integer)
-            str = ints(str, (Integer) info);
-        if (info instanceof Biome)
-            str = biome(str, (Biome) info);
-        if (info instanceof WorldPlayer)
-            str = worldPlayer((WorldPlayer) info, str);
-        if (info instanceof World)
-            str = world(str, (World) info);
-        if (info instanceof RTPCommand)
-            str = cmd(str, (RTPCommand) info);
-        if (info instanceof PermissionNode)
-            str = permNode(str, (PermissionNode) info);
-        if (info instanceof RTPWorld)
-            str = ints(str, ((RTPWorld) info).getPrice());
-        if (p instanceof Player)
-            str = papi((Player) p, str);
-        return str;
+    public static List<ComponentLike> arguments(@Nullable CommandSender sender, @Nullable Object info) {
+        List<ComponentLike> args = new ArrayList<>();
+        if (sender instanceof Player player) {
+            args.add(Argument.target(player));
+            addMiniPlaceholders(args);
+        }
+        add(args, sender, info);
+        return args;
     }
 
-    private static String worldPlayer(WorldPlayer pWorld, String str) {
-        str = ints(str, pWorld.getPrice());
-        str = world(str, pWorld.getWorld());
-        str = perm(str, pWorld.getPlayer(), pWorld.getWorld().getName());
-        return player(str, pWorld.getPlayer());
+    public static TagResolver tagResolver(@Nullable CommandSender sender, @Nullable Object info, Object... namedValues) {
+        TagResolver.Builder builder = TagResolver.builder();
+        if (sender instanceof Player) addMiniPlaceholders(builder);
+        addTags(builder, sender, info);
+        for (int i = 0; i + 1 < namedValues.length; i += 2) {
+            tag(builder, String.valueOf(namedValues[i]), String.valueOf(namedValues[i + 1]));
+        }
+        return builder.build();
     }
 
-    private static String perm(String str, CommandSender player, String world) {
-        if (str.contains(Placeholders.PERMISSION.name))
-            str = str.replace(Placeholders.PERMISSION.name, PermissionCheck.getAWorldText(player, world).string());
-        return str;
+    private static void add(List<ComponentLike> args, @Nullable CommandSender sender, @Nullable Object info) {
+        if (info instanceof Collection<?> collection) {
+            collection.forEach(object -> add(args, sender, object));
+        } else if (info instanceof String value) {
+            addStringAliases(args, value);
+        } else if (info instanceof Player player) {
+            addPlayer(args, player);
+        } else if (info instanceof Location location) {
+            addLocation(args, location);
+        } else if (info instanceof Integer integer) {
+            addIntegerAliases(args, integer);
+        } else if (info instanceof Biome biome) {
+            args.add(Argument.component(Placeholders.BIOME.key(), Component.translatable(biome)));
+        } else if (info instanceof WorldPlayer worldPlayer) {
+            addWorldPlayer(args, worldPlayer);
+        } else if (info instanceof World world) {
+            addWorld(args, world);
+        } else if (info instanceof RTPCommand command) {
+            addPermission(args, command.permission());
+        } else if (info instanceof PermissionNode permissionNode) {
+            addPermission(args, permissionNode);
+        } else if (info instanceof RTPWorld rtpWorld) {
+            args.add(Argument.numeric(Placeholders.PRICE.key(), rtpWorld.getPrice()));
+        }
     }
 
-    private static String string(String str, String info) {
-        if (str.contains(Placeholders.COMMAND.name))
-            str = str.replace(Placeholders.COMMAND.name, info);
-        if (str.contains(Placeholders.PLAYER_NAME.name))
-            str = str.replaceAll(Placeholders.PLAYER_NAME.name, info);
-        if (str.contains(Placeholders.WORLD.name))
-            str = str.replaceAll(Placeholders.WORLD.name, info);
-        if (str.contains(Placeholders.COOLDOWN.name))
-            str = str.replaceAll(Placeholders.COOLDOWN.name, info);
-        if (str.contains(Placeholders.CURRENTDVERSION.name))
-            str = str.replaceAll(Placeholders.CURRENTDVERSION.name, info);
-
-        if (str.contains(Placeholders.NEWVERSION.name))
-            str = str.replaceAll(Placeholders.NEWVERSION.name, info);
-        return str;
-    }
-    private static String location(String str, Location loc) {
-        if (str.contains(Placeholders.LOCATION_X.name))
-            str = str.replace(Placeholders.LOCATION_X.name, String.valueOf(loc.getBlockX()));
-        if (str.contains(Placeholders.LOCATION_Y.name))
-            str = str.replace(Placeholders.LOCATION_Y.name, String.valueOf(loc.getBlockY()));
-        if (str.contains(Placeholders.LOCATION_Z.name))
-            str = str.replace(Placeholders.LOCATION_Z.name, String.valueOf(loc.getBlockZ()));
-        return world(str, loc.getWorld());
+    private static void addWorldPlayer(List<ComponentLike> args, WorldPlayer worldPlayer) {
+        args.add(Argument.numeric(Placeholders.PRICE.key(), worldPlayer.getPrice()));
+        addWorld(args, worldPlayer.getWorld());
+        args.add(Argument.string(Placeholders.PERMISSION.key(),
+                PermissionCheck.getAWorldText(worldPlayer.getPlayer(), worldPlayer.getWorld().getName()).string()));
+        addPlayer(args, worldPlayer.getPlayer());
     }
 
-    private static String world(String str, World world) {
-        if (str.contains(Placeholders.WORLD.name))
-            str = str.replace(Placeholders.WORLD.name, world.getName());
-        return str;
+    private static void addLocation(List<ComponentLike> args, Location location) {
+        args.add(Argument.numeric(Placeholders.LOCATION_X.key(), location.getBlockX()));
+        args.add(Argument.numeric(Placeholders.LOCATION_Y.key(), location.getBlockY()));
+        args.add(Argument.numeric(Placeholders.LOCATION_Z.key(), location.getBlockZ()));
+        addWorld(args, location.getWorld());
     }
 
-    private static String player(String str, Player player) {
-        if (str.contains(Placeholders.PLAYER_NAME.name))
-            str = str.replace(Placeholders.PLAYER_NAME.name, player.getName());
-        return str;
+    private static void addWorld(List<ComponentLike> args, @Nullable World world) {
+        if (world != null) {
+            args.add(Argument.string(Placeholders.WORLD.key(), world.getName()));
+        }
     }
 
-    private static String papi(Player player, String str) {
-        //Papi
-        if (BetterRTP.getInstance().isPlaceholderAPI())
-            try {
-                str = PlaceholderAPI.setPlaceholders(player, str);
-            } catch (Exception e) {
-                //Something went wrong with PAPI
-            }
-        return str;
+    private static void addPlayer(List<ComponentLike> args, Player player) {
+        args.add(Argument.string(Placeholders.PLAYER_NAME.key(), player.getName()));
     }
 
-    private static String ints(String str, int num) {
-        if (str.contains(Placeholders.ATTEMPTS.name))
-            str = str.replace(Placeholders.ATTEMPTS.name, String.valueOf(num));
-        if (str.contains(Placeholders.PRICE.name))
-            str = str.replace(Placeholders.PRICE.name, String.valueOf(num));
-        if (str.contains(Placeholders.DELAY.name))
-            str = str.replace(Placeholders.DELAY.name, String.valueOf(num));
-        if (str.contains(Placeholders.TIME.name))
-            str = str.replace(Placeholders.TIME.name, String.valueOf(num));
-        return str;
+    private static void addPermission(List<ComponentLike> args, PermissionCheck permission) {
+        args.add(Argument.string(Placeholders.PERMISSION.key(), permission.getNode()));
     }
 
-    private static String biome(String str, Biome biome) {
-        if (str.contains(Placeholders.BIOME.name))
-            str = str.replace(Placeholders.BIOME.name, biome.name());
-        return str;
+    private static void addStringAliases(List<ComponentLike> args, String value) {
+        args.add(Argument.string(Placeholders.COMMAND.key(), value));
+        args.add(Argument.string(Placeholders.PLAYER_NAME.key(), value));
+        args.add(Argument.string(Placeholders.WORLD.key(), value));
+        args.add(Argument.string(Placeholders.COOLDOWN.key(), value));
+        args.add(Argument.string(Placeholders.CURRENTDVERSION.key(), value));
+        args.add(Argument.string(Placeholders.NEWVERSION.key(), value));
+        args.add(Argument.string("type", value));
+        args.add(Argument.string("value", value));
     }
 
-    private static String cmd(String str, RTPCommand cmd) {
-        if (str.contains(Placeholders.PERMISSION.name))
-            str = permNode(str, cmd.permission());
-        return str;
+    private static void addIntegerAliases(List<ComponentLike> args, int value) {
+        args.add(Argument.numeric(Placeholders.ATTEMPTS.key(), value));
+        args.add(Argument.numeric(Placeholders.PRICE.key(), value));
+        args.add(Argument.numeric(Placeholders.DELAY.key(), value));
+        args.add(Argument.numeric(Placeholders.TIME.key(), value));
     }
 
-    private static String permNode(String str, PermissionCheck perm) {
-        if (str.contains(Placeholders.PERMISSION.name))
-            str = str.replace(Placeholders.PERMISSION.name, perm.getNode());
-        return str;
+    private static void addMiniPlaceholders(List<ComponentLike> args) {
+        try {
+            args.add(Argument.tagResolver(io.github.miniplaceholders.api.MiniPlaceholders.audienceGlobalPlaceholders()));
+        } catch (NoClassDefFoundError ignored) {
+            // MiniPlaceholders is optional.
+        }
+    }
+
+    private static void addMiniPlaceholders(TagResolver.Builder builder) {
+        try {
+            builder.resolver(io.github.miniplaceholders.api.MiniPlaceholders.audienceGlobalPlaceholders());
+        } catch (NoClassDefFoundError ignored) {
+            // MiniPlaceholders is optional.
+        }
+    }
+
+    private static void addTags(TagResolver.Builder builder, @Nullable CommandSender sender, @Nullable Object info) {
+        for (ComponentLike argument : arguments(sender, info)) {
+            Object value = argument.asComponent();
+            value = value instanceof Component component ? component : Component.text(String.valueOf(value));
+        }
+        if (info instanceof Collection<?> collection) {
+            collection.forEach(object -> addTags(builder, sender, object));
+        } else if (info instanceof String value) {
+            tagStringAliases(builder, value);
+        } else if (info instanceof Player player) {
+            tag(builder, Placeholders.PLAYER_NAME.key(), player.getName());
+        } else if (info instanceof Location location) {
+            tag(builder, Placeholders.LOCATION_X.key(), location.getBlockX());
+            tag(builder, Placeholders.LOCATION_Y.key(), location.getBlockY());
+            tag(builder, Placeholders.LOCATION_Z.key(), location.getBlockZ());
+            if (location.getWorld() != null) tag(builder, Placeholders.WORLD.key(), location.getWorld().getName());
+        } else if (info instanceof Integer integer) {
+            tagIntegerAliases(builder, integer);
+        } else if (info instanceof Biome biome) {
+            tag(builder, Placeholders.BIOME.key(), biome.name());
+        } else if (info instanceof WorldPlayer worldPlayer) {
+            tag(builder, Placeholders.PRICE.key(), worldPlayer.getPrice());
+            tag(builder, Placeholders.WORLD.key(), worldPlayer.getWorld().getName());
+            tag(builder, Placeholders.PERMISSION.key(),
+                    PermissionCheck.getAWorldText(worldPlayer.getPlayer(), worldPlayer.getWorld().getName()).string());
+            tag(builder, Placeholders.PLAYER_NAME.key(), worldPlayer.getPlayer().getName());
+        } else if (info instanceof World world) {
+            tag(builder, Placeholders.WORLD.key(), world.getName());
+        } else if (info instanceof RTPCommand command) {
+            tag(builder, Placeholders.PERMISSION.key(), command.permission().getNode());
+        } else if (info instanceof PermissionNode permissionNode) {
+            tag(builder, Placeholders.PERMISSION.key(), permissionNode.getNode());
+        } else if (info instanceof RTPWorld rtpWorld) {
+            tag(builder, Placeholders.PRICE.key(), rtpWorld.getPrice());
+        }
+    }
+
+    private static void tagStringAliases(TagResolver.Builder builder, String value) {
+        tag(builder, Placeholders.COMMAND.key(), value);
+        tag(builder, Placeholders.PLAYER_NAME.key(), value);
+        tag(builder, Placeholders.WORLD.key(), value);
+        tag(builder, Placeholders.COOLDOWN.key(), value);
+        tag(builder, Placeholders.CURRENTDVERSION.key(), value);
+        tag(builder, Placeholders.NEWVERSION.key(), value);
+    }
+
+    private static void tagIntegerAliases(TagResolver.Builder builder, int value) {
+        tag(builder, Placeholders.ATTEMPTS.key(), value);
+        tag(builder, Placeholders.PRICE.key(), value);
+        tag(builder, Placeholders.DELAY.key(), value);
+        tag(builder, Placeholders.TIME.key(), value);
+    }
+
+    private static void tag(TagResolver.Builder builder, String name, Object value) {
+        builder.tag(name, Tag.selfClosingInserting(Component.text(String.valueOf(value))));
     }
 }

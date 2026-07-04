@@ -4,6 +4,9 @@ import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 
 public enum MessagesCore {
 
@@ -42,28 +45,41 @@ public enum MessagesCore {
         this.section = section;
     }
 
-    private static final String pre = "Messages.";
+    private static final String pre = "cleanrtp.messages.";
 
     public void send(CommandSender sendi) {
-        RtpMessage.sms(sendi, RtpMessage.getLang().getString(pre + section));
+        RtpMessage.sms(sendi, getComponent(sendi, null));
     }
 
     public void send(CommandSender sendi, Object placeholderInfo) {
-        RtpMessage.sms(sendi, RtpMessage.getLang().getString(pre + section), placeholderInfo);
+        RtpMessage.sms(sendi, getComponent(sendi, placeholderInfo));
     }
 
     public void send(CommandSender sendi, List<Object> placeholderInfo) {
-        RtpMessage.sms(sendi, RtpMessage.getLang().getString(pre + section), placeholderInfo);
+        RtpMessage.sms(sendi, getComponent(sendi, placeholderInfo));
     }
 
-    public String get(CommandSender p, Object placeholderInfo) {
-        return Message.placeholder(p, RtpMessage.getLang().getString(pre + section), placeholderInfo);
+    public void send(CommandSender sendi, ComponentLike... args) {
+        RtpMessage.sms(sendi, Message.prefixed(Component.translatable(key(), args)));
+    }
+
+    public Component getComponent(CommandSender p, Object placeholderInfo) {
+        return Message.translatable(p, key(), placeholderInfo);
+    }
+
+    public Component getComponentRaw(CommandSender p, Object placeholderInfo) {
+        return Message.translatableRaw(p, key(), placeholderInfo);
     }
 
     public void send(CommandSender sendi, HashMap<String, String> placeholder_values) {
-        String msg = RtpMessage.getLang().getString(pre + section);
-        for (String ph : placeholder_values.values())
-            msg = msg.replace(ph, placeholder_values.get(ph));
-        RtpMessage.sms(sendi, msg);
+        Component component = Component.translatable(key(),
+                placeholder_values.entrySet().stream()
+                        .map(entry -> Argument.string(entry.getKey(), entry.getValue()))
+                        .toList());
+        RtpMessage.sms(sendi, Message.prefixed(component));
+    }
+
+    public String key() {
+        return pre + section.toLowerCase();
     }
 }

@@ -22,7 +22,9 @@ import eu.mikart.cleanrtp.player.rtp.RtpPlayerInfo;
 import eu.mikart.cleanrtp.player.rtp.RtpType;
 import eu.mikart.cleanrtp.references.PermissionCheck;
 import eu.mikart.cleanrtp.references.WarningHandler;
+import eu.mikart.cleanrtp.references.messages.Message;
 import eu.mikart.cleanrtp.references.messages.RtpMessage;
+import eu.mikart.cleanrtp.references.messages.placeholder.PlaceholderAnalyzer;
 import eu.mikart.cleanrtp.references.messages.placeholder.Placeholders;
 import eu.mikart.cleanrtp.references.rtpinfo.PermissionGroup;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
@@ -30,6 +32,9 @@ import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldType;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldLocation;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldPermissionGroup;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 
 public class RtpHelper {
 
@@ -100,14 +105,16 @@ public class RtpHelper {
         WorldPlayer pWorld = getPlayerWorld(setup_info);
         RtpErrorRequestReason cantReason = RtpCheckHelper.canRTP(player, sendi, pWorld, setup_info.getPlayerInfo());
         if (cantReason != null) {
-            String msg = cantReason.getMsg().get(player, null);
+            List<ComponentLike> args = new ArrayList<>(PlaceholderAnalyzer.arguments(player, pWorld));
             if (cantReason == RtpErrorRequestReason.COOLDOWN) {
-                msg = msg.replace(Placeholders.COOLDOWN.name, HelperDate.total(RtpCheckHelper.getCooldown(player, pWorld)));
-                msg = msg.replace(Placeholders.TIME.name, HelperDate.total(RtpCheckHelper.getCooldown(player, pWorld)));
+                String cooldown = HelperDate.total(RtpCheckHelper.getCooldown(player, pWorld));
+                args.add(Argument.string(Placeholders.COOLDOWN.key(), cooldown));
+                args.add(Argument.string(Placeholders.TIME.key(), cooldown));
             }
-            RtpMessage.sms(player, msg, pWorld);
+            Component msg = Message.prefixed(Component.translatable(cantReason.getMsg().key(), args));
+            RtpMessage.sms(player, msg);
             if (sendi != player)
-                RtpMessage.sms(sendi, msg, pWorld);
+                RtpMessage.sms(sendi, msg);
             return;
         }
 
@@ -155,7 +162,7 @@ public class RtpHelper {
                 setup_info.setLocation(worldLocation);
                 setup_info.setWorld(worldLocation.getWorld());
             }
-            if (setup_info.getLocation() == null && BetterRTP.getInstance().getSettings().isDebug())
+            if (setup_info.getLocation() == null && BetterRTP.getInstance().getSettings().getGeneral().isDebug())
                 WarningHandler.warn(WarningHandler.WARNING.USELOCATION_ENABLED_NO_LOCATION_AVAILABLE,
                         "This is not an error! UseLocationIfAvailable is set to `true`, but no location was found for "
                                 + setup_info.getSender().getName() + "! Using world defaults! (Maybe they dont have permission?)");

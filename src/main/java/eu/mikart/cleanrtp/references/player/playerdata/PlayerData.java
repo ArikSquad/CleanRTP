@@ -13,8 +13,6 @@ public class PlayerData {
 
     public boolean loading; //Is this players data loading?
     public final Player player;
-    //Menus
-    @Getter final PlayerDataMenus menu = new PlayerDataMenus();
     //Player Data
     @Getter final HashMap<World, CooldownData> cooldowns = new HashMap<>();
     //@Getter @Setter CooldownData globalCooldown;

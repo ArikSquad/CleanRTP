@@ -18,7 +18,7 @@ public interface RtpWorldDefaulted {
 
     void setMinRadius(int value);
 
-    void setPrice(int value);
+    void setPrice(float value);
 
     void setBiomes(List<String> value);
 
@@ -31,8 +31,6 @@ public interface RtpWorldDefaulted {
     void setMaxY(int value);
 
     void setCooldown(long value);
-
-    void setRTPOnDeath(boolean bool);
 
     default void setupDefaults() {
         setAllFrom(BetterRTP.getInstance().getRTP().getRTPdefaultWorld());
@@ -50,6 +48,5 @@ public interface RtpWorldDefaulted {
         setMinY(rtpWorld.getMinY());
         setMaxY(rtpWorld.getMaxY());
         setCooldown(rtpWorld.getCooldown());
-        setRTPOnDeath(rtpWorld.getRTPOnDeath());
     }
 }

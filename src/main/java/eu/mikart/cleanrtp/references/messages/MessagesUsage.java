@@ -1,6 +1,5 @@
 package eu.mikart.cleanrtp.references.messages;
 
-import eu.mikart.cleanrtp.references.file.FileData;
 import org.bukkit.command.CommandSender;
 
 public enum MessagesUsage implements MessageData {
@@ -27,7 +26,7 @@ public enum MessagesUsage implements MessageData {
     }
 
     public void send(CommandSender sendi, Object placeholderInfo) {
-        RtpMessage.sms(sendi, RtpMessage.getLang().getString(prefix() + section), placeholderInfo);
+        RtpMessage.sms(sendi, Message.translatableRaw(sendi, key(), placeholderInfo));
     }
 
     @Override
@@ -40,8 +39,4 @@ public enum MessagesUsage implements MessageData {
         return section;
     }
 
-    @Override
-    public FileData file() {
-        return RtpMessage.getLang();
-    }
 }

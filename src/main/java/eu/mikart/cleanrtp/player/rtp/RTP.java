@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import lombok.Getter;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.events.custom.RtpSettingUpEvent;
-import eu.mikart.cleanrtp.references.file.FileOther;
 import eu.mikart.cleanrtp.references.helpers.RtpHelper;
 import eu.mikart.cleanrtp.references.helpers.RtpCheckHelper;
 import eu.mikart.cleanrtp.references.rtpinfo.PermissionGroup;
@@ -35,13 +34,13 @@ public class RTP {
     @Getter private final HashMap<String, PermissionGroup> permissionGroups = new HashMap<>();
 
     public void load() {
-        FileOther.Filetype config = FileOther.Filetype.CONFIG;
-        disabledWorlds = config.getStringList("DisabledWorlds");
-        maxAttempts = config.getInt("Settings.MaxAttempts");
-        delayTime = config.getInt("Settings.Delay.Time");
-        cancelOnMove = config.getBoolean("Settings.Delay.CancelOnMove");
-        cancelOnDamage = config.getBoolean("Settings.Delay.CancelOnDamage");
-        blockList = config.getStringList("BlacklistedBlocks");
+        var config = BetterRTP.getInstance().getSettings();
+        disabledWorlds = config.getDisabledWorlds();
+        maxAttempts = config.getGeneral().getMaxAttempts();
+        delayTime = config.getGeneral().getDelay().getTime();
+        cancelOnMove = config.getGeneral().getDelay().isCancelOnMove();
+        cancelOnDamage = config.getGeneral().getDelay().isCancelOnDamage();
+        blockList = config.getBlacklistedBlocks();
         //Overrides
         RTPLoader.loadOverrides(overriden);
         //WorldType
@@ -82,7 +81,7 @@ public class RTP {
     private void rtp(CommandSender sendi, WorldPlayer pWorld, RtpType type) {
         //Cooldown
         Player p = pWorld.getPlayer();
-        getPl().getPInfo().getRtping().put(p, true); //Cache player so they cant run '/rtp' again while rtp'ing
+        getPl().getPInfo().getCurrentRtp().put(p, true); //Cache player so they cant run '/rtp' again while rtp'ing
         //Setup player rtp methods
         RTPPlayer rtpPlayer = new RTPPlayer(p, this, pWorld, type);
         // Delaying? Else, just go

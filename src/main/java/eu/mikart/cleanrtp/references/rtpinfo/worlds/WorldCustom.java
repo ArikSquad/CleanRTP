@@ -1,8 +1,6 @@
 package eu.mikart.cleanrtp.references.rtpinfo.worlds;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -10,125 +8,26 @@ import org.jetbrains.annotations.NotNull;
 
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.rtp.RtpShape;
-import eu.mikart.cleanrtp.references.file.FileOther;
 import eu.mikart.cleanrtp.references.messages.RtpMessage;
 
 public class WorldCustom implements RTPWorld, RtpWorldDefaulted {
     public World world;
     private boolean useWorldborder, RTPOnDeath;
-    private int centerX, centerZ, maxRad, minRad, price, miny, maxy;
+    private int centerX, centerZ, maxRad, minRad, miny, maxy;
+    private float price;
     private long cooldown;
     private List<String> biomes;
     private RtpShape shape;
 
     public WorldCustom(World world) {
-        //String pre = "CustomWorlds.";
-        FileOther.Filetype config = BetterRTP.getInstance().getFiles().getType(FileOther.Filetype.CONFIG);
-        List<Map<?, ?>> map = config.getMapList("CustomWorlds");
         this.world = world;
 
         //Set Defaults
         setupDefaults();
 
-        //Find Custom World and cache values
-        for (Map<?, ?> m : map) {
-            for (Map.Entry<?, ?> entry : m.entrySet()) {
-                String key = entry.getKey().toString();
-                if (!key.equals(world.getName()))
-                    continue;
-                Map<?, ?> test = ((Map<?, ?>) m.get(key));
-                if (test == null)
-                    continue;
-                if (test.get("UseWorldBorder") != null) {
-                    if (test.get("UseWorldBorder").getClass() == Boolean.class) {
-                        useWorldborder = Boolean.parseBoolean(test.get("UseWorldBorder").toString());
-                        BetterRTP.debug("- UseWorldBorder: " + this.useWorldborder);
-                    }
-                }
-                if (test.get("RTPOnDeath") != null) {
-                    if (test.get("RTPOnDeath").getClass() == Boolean.class) {
-                        RTPOnDeath = Boolean.parseBoolean(test.get("RTPOnDeath").toString());
-                        BetterRTP.debug("- RTPOnDeath: " + this.RTPOnDeath);
-                    }
-                }
-                if (test.get("CenterX") != null) {
-                    if (test.get("CenterX").getClass() == Integer.class) {
-                        centerX = Integer.parseInt((test.get("CenterX")).toString());
-                        BetterRTP.debug("- CenterX: " + this.centerX);
-                    }
-                }
-                if (test.get("CenterZ") != null) {
-                    if (test.get("CenterZ").getClass() == Integer.class) {
-                        centerZ = Integer.parseInt((test.get("CenterZ")).toString());
-                        BetterRTP.debug("- CenterZ: " + this.centerZ);
-                    }
-                }
-                if (test.get("MaxRadius") != null) {
-                    if (test.get("MaxRadius").getClass() == Integer.class) {
-                        maxRad = Integer.parseInt((test.get("MaxRadius")).toString());
-                        BetterRTP.debug("- MaxRadius: " + this.maxRad);
-                    }
-                    if (maxRad <= 0) {
-                        RtpMessage.sms(Bukkit.getConsoleSender(),
-                                "WARNING! Custom world '" + world + "' Maximum radius of '" + maxRad + "' is not allowed! Set to default value!");
-                        maxRad = BetterRTP.getInstance().getRTP().getRTPdefaultWorld().getMaxRadius();
-                    }
-                }
-                if (test.get("MinRadius") != null) {
-                    if (test.get("MinRadius").getClass() == Integer.class) {
-                        minRad = Integer.parseInt((test.get("MinRadius")).toString());
-                        BetterRTP.debug("- MinRadius: " + this.minRad);
-                    }
-                    if (minRad < 0 || minRad >= maxRad) {
-                        RtpMessage.sms(Bukkit.getConsoleSender(),
-                                "WARNING! Custom world '" + world + "' Minimum radius of '" + minRad + "' is not allowed! Set to default value!");
-                        minRad = BetterRTP.getInstance().getRTP().getRTPdefaultWorld().getMinRadius();
-                        if (minRad >= maxRad)
-                            maxRad = BetterRTP.getInstance().getRTP().getRTPdefaultWorld().getMaxRadius();
-                    }
-                }
-                if (test.get("Biomes") != null) {
-                    if (test.get("Biomes").getClass() == ArrayList.class) {
-                        this.biomes = new ArrayList<String>((ArrayList) test.get("Biomes"));
-                        BetterRTP.debug("- Biomes: " + this.biomes);
-                    }
-                }
-                if (BetterRTP.getInstance().getFiles().getType(FileOther.Filetype.ECO).getBoolean("Economy.Enabled"))
-                    if (test.get("Price") != null) {
-                        if (test.get("Price").getClass() == Integer.class)
-                            this.price = Integer.parseInt(test.get("Price").toString());
-                        BetterRTP.debug("- Price: " + this.price);
-                    }
-                if (test.get("Shape") != null) {
-                    if (test.get("Shape").getClass() == String.class) {
-                        try {
-                            this.shape = RtpShape.valueOf(test.get("Shape").toString().toUpperCase());
-                            BetterRTP.debug("- Shape: " + this.shape);
-                        } catch (Exception e) {
-                            //Invalid shape
-                        }
-                    }
-                }
-                if (test.get("MinY") != null) {
-                    if (test.get("MinY").getClass() == Integer.class) {
-                        this.miny = Integer.parseInt((test.get("MinY")).toString());
-                        BetterRTP.debug("- MinY: " + this.miny);
-                    }
-                }
-                if (test.get("MaxY") != null) {
-                    if (test.get("MaxY").getClass() == Integer.class) {
-                        this.maxy = Integer.parseInt((test.get("MaxY")).toString());
-                        BetterRTP.debug("- MaxY: " + this.maxy);
-                    }
-                }
-                if (test.get("Cooldown") != null) {
-                    if (test.get("Cooldown").getClass() == Integer.class || test.get("Cooldown").getClass() == Long.class) {
-                        this.cooldown = Long.parseLong((test.get("Cooldown")).toString());
-                        BetterRTP.debug("- Cooldown: " + this.cooldown);
-                    }
-                }
-            }
-        }
+        BetterRTP.getInstance().getSettings()
+                .findCustomWorld(world.getName())
+                .ifPresent(settings -> settings.applyTo(this, BetterRTP.getInstance().getSettings().getGeneral().getEconomy().isEnabled()));
 
         if (maxRad <= 0) {
             RtpMessage.sms(Bukkit.getConsoleSender(),
@@ -174,7 +73,7 @@ public class WorldCustom implements RTPWorld, RtpWorldDefaulted {
     }
 
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return price;
     }
 
@@ -209,11 +108,6 @@ public class WorldCustom implements RTPWorld, RtpWorldDefaulted {
         return cooldown;
     }
 
-    @Override
-    public boolean getRTPOnDeath() {
-        return RTPOnDeath;
-    }
-
     //Setters
     @Override
     public void setUseWorldBorder(boolean value) {
@@ -241,7 +135,7 @@ public class WorldCustom implements RTPWorld, RtpWorldDefaulted {
     }
 
     @Override
-    public void setPrice(int value) {
+    public void setPrice(float value) {
         this.price = value;
     }
 
@@ -273,10 +167,5 @@ public class WorldCustom implements RTPWorld, RtpWorldDefaulted {
     @Override
     public void setCooldown(long value) {
         this.cooldown = value;
-    }
-
-    @Override
-    public void setRTPOnDeath(boolean value) {
-        this.RTPOnDeath = value;
     }
 }

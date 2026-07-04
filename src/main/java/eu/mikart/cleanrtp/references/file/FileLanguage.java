@@ -1,118 +1,74 @@
 package eu.mikart.cleanrtp.references.file;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore;
+import net.kyori.adventure.translation.GlobalTranslator;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-public class FileLanguage implements FileData {
-    private final YamlConfiguration config = new YamlConfiguration();
+public class FileLanguage {
+    private MiniMessageTranslationStore translationStore;
 
-    @Override
-    public YamlConfiguration getConfig() {
-        return config;
-    }
-
-    @Override
-    public File getFile() {
-        return null;
-    }
-
-    @Override
-    public String fileName() {
-        return null;
-    }
-
-    @Override
-    public Plugin plugin() {
-        return BetterRTP.getInstance();
-    }
-
-    @Override
     public void load() {
-        generateDefaults();
-        String fileName = "lang" + File.separator + FileOther.Filetype.CONFIG.getString("Language-File");
-        File file = new File(plugin().getDataFolder(), fileName);
-        if (!file.exists()) {
-            fileName = "lang" + File.separator + defaultLangs[0]; //Default to english
-            file = new File(plugin().getDataFolder(), fileName);
+        if (translationStore != null) {
+            GlobalTranslator.translator().removeSource(translationStore);
         }
-        try {
-            config.load(file);
-            InputStream in = plugin().getResource(fileName);
-            if (in == null)
-                in = plugin().getResource(fileName.replace(File.separator, "/"));
-            if (in != null) {
-                config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(in)));
-                config.options().copyDefaults(true);
-                in.close();
+
+        translationStore = MiniMessageTranslationStore.create(
+                Key.key("cleanrtp", "translations"),
+                MiniMessage.builder().tags(translationTags()).build());
+
+        for (Locale locale : supportedLocales()) {
+            try {
+                ResourceBundle bundle = ResourceBundle.getBundle(
+                        "translations.cleanrtp",
+                        locale,
+                        BetterRTP.getInstance().getClass().getClassLoader());
+                translationStore.registerAll(locale, bundle, false);
+            } catch (MissingResourceException ignored) {
+                BetterRTP.getInstance().getLogger().warning("Missing translation bundle for " + locale);
             }
-            config.save(file);
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+
+        GlobalTranslator.translator().addSource(translationStore);
+    }
+
+    private TagResolver translationTags() {
+        try {
+            return TagResolver.resolver(TagResolver.standard(), io.github.miniplaceholders.api.MiniPlaceholders.audienceGlobalPlaceholders());
+        } catch (NoClassDefFoundError ignored) {
+            return TagResolver.standard();
         }
     }
 
-    private final String[] defaultLangs = {
-            "en.yml", // English - KEEP AS FIRST IN THE LIST
-            "br.yml", //Portuguese
-            "chs.yml", //Chinese Simplified (OasisAkari)
-            "cht.yml", //Chinese (OasisAkari & kamiya10)
-            "cs.yml", //Czech (Lewisparkle)
-            "da.yml", //Danish (Janbchr)
-            "de.yml", //German (IBimsDaNico#8690)
-            "es.yml", //Spanish (emgv)
-            "fr.yml", //French (At0micA55 & Mrflo67)
-            "he.yml", //Hebrew (thefourcraft)
-            "hu.yml", //Hungarian (Has-X)
-            "it.yml", //Italian (iVillager)
-            "ja.yml", //Japanese (ViaSnake)
-            "nl.yml", //Dutch (QuestalNetwork) (GeleVla)
-            "no.yml", //Norwegian (Fraithor & Janbchr)
-            "pl.yml", //Polish (Farum & TeksuSiK)
-            "ro.yml", //Romanian (GamingXBlood)
-            "ru.yml", //Russian (Logan)
-            "tr.yml", //Turkish (Erissos)
-            "vi.yml", //Vietnamese (VoChiDanh#0862)
-    };
-
-    private void generateDefaults() {
-        // Generate all language files
-        for (String yaml : defaultLangs) {
-            generateDefaultConfig(yaml, yaml); // Generate defaults of this language
-
-            // Not english, make sure all options are present
-            if (!yaml.equals(defaultLangs[0]))
-                // Generate the english defaults (in case some options are missing)
-                generateDefaultConfig(yaml, defaultLangs[0]);
-        }
-    }
-
-    private void generateDefaultConfig(String fName, String fNameDef /*Name of file to generate defaults*/) {
-        String fileName = "lang" + File.separator + fName;
-        File file = new File(plugin().getDataFolder(), fileName);
-        if (!file.exists())
-            plugin().saveResource(fileName, false);
-        try {
-            YamlConfiguration config = new YamlConfiguration();
-            config.load(file);
-            String fileNameDef = "lang" + File.separator + fNameDef;
-            InputStream in = plugin().getResource(fileNameDef);
-            if (in == null)
-                in = plugin().getResource(fileNameDef.replace(File.separator, "/"));
-            if (in != null) {
-                config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8)));
-                config.options().copyDefaults(true);
-                in.close();
-            }
-            config.save(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    private Locale[] supportedLocales() {
+        return new Locale[] {
+                Locale.US,
+                Locale.of("pt", "BR"),
+                Locale.of("zh", "CN"),
+                Locale.of("zh", "TW"),
+                Locale.of("cs", "CZ"),
+                Locale.of("da", "DK"),
+                Locale.GERMANY,
+                Locale.of("es", "ES"),
+                Locale.FRANCE,
+                Locale.of("he", "IL"),
+                Locale.of("hu", "HU"),
+                Locale.ITALY,
+                Locale.JAPAN,
+                Locale.of("nl", "NL"),
+                Locale.of("no", "NO"),
+                Locale.of("pl", "PL"),
+                Locale.of("ro", "RO"),
+                Locale.of("ru", "RU"),
+                Locale.of("tr", "TR"),
+                Locale.of("uk", "UA"),
+                Locale.of("vi", "VN")
+        };
     }
 }

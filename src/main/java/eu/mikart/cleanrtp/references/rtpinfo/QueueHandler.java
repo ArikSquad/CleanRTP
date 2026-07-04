@@ -22,7 +22,7 @@ public class QueueHandler implements Listener { //Randomly queues up some safe l
     private final QueueGenerator generator = new QueueGenerator();
 
     public static boolean isEnabled() {
-        return BetterRTP.getInstance().getSettings().isQueueEnabled();
+        return BetterRTP.getInstance().getSettings().getGeneral().getQueue().isEnabled();
     }
 
     public void registerEvents(BetterRTP pl) {

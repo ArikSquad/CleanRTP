@@ -33,14 +33,14 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
     @Override
     public void execute(CommandSender sender, String label, String[] args) {
         if (args.length >= 4) {
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values()) {
+            for (RtpCmdEdit cmd : RtpCmdEdit.values()) {
                 if (!cmd.name().equalsIgnoreCase(args[1])) continue;
                 switch (cmd) {
                     case CUSTOMWORLD:
                         if (args.length >= 5) {
                             for (World world : Bukkit.getWorlds()) {
                                 if (world.getName().equals(args[2])) {
-                                    for (RTP_CMD_EDIT_SUB sub_cmd : RTP_CMD_EDIT_SUB.values())
+                                    for (RtpCmdEditSub sub_cmd : RtpCmdEditSub.values())
                                         if (sub_cmd.name().equalsIgnoreCase(args[3])) {
                                             RtpEditWorldsHelper.editCustomWorld(sender, sub_cmd, world.getName(), args[4]);
                                             return;
@@ -58,7 +58,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                         if (args.length >= 5) {
                             for (Map.Entry<String, RTPWorld> location : BetterRTP.getInstance().getRTP().getRTPworldLocations().entrySet()) {
                                 if (location.getKey().equals(args[2])) {
-                                    for (RTP_CMD_EDIT_SUB sub_cmd : RTP_CMD_EDIT_SUB.values())
+                                    for (RtpCmdEditSub sub_cmd : RtpCmdEditSub.values())
                                         if (sub_cmd.name().equalsIgnoreCase(args[3])) {
                                             RtpEditWorldsHelper.editLocation(sender, sub_cmd, location.getKey(), args[4]);
                                             return;
@@ -73,12 +73,12 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                         usage(sender, label, cmd);
                         return;
                     case PERMISSION_GROUP:
-                        if (BetterRTP.getInstance().getSettings().isPermissionGroupEnabled() && args.length >= 6) {
+                        if (BetterRTP.getInstance().getSettings().getPermissionGroup().isEnabled() && args.length >= 6) {
                             for (String group : BetterRTP.getInstance().getRTP().getPermissionGroups().keySet()) {
                                 if (group.equals(args[2])) {
                                     for (World world : Bukkit.getWorlds()) {
                                         if (world.getName().equals(args[3])) {
-                                            for (RTP_CMD_EDIT_SUB sub_cmd : RTP_CMD_EDIT_SUB.values())
+                                            for (RtpCmdEditSub sub_cmd : RtpCmdEditSub.values())
                                                 if (sub_cmd.name().toLowerCase().startsWith(args[4].toLowerCase())) {
                                                     RtpEditWorldsHelper.editPermissionGroup(sender, sub_cmd, group, world.getName(), args[5]);
                                                     return;
@@ -95,7 +95,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                         usage(sender, label, cmd);
                         return;
                     case DEFAULT:
-                        for (RTP_CMD_EDIT_SUB sub_cmd : RTP_CMD_EDIT_SUB.values())
+                        for (RtpCmdEditSub sub_cmd : RtpCmdEditSub.values())
                             if (sub_cmd.name().equalsIgnoreCase(args[2].toLowerCase())) {
                                 RtpEditWorldsHelper.editDefault(sender, sub_cmd, args[3]);
                                 return;
@@ -133,7 +133,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                 }
             }
         } else if (args.length >= 2) {
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values())
+            for (RtpCmdEdit cmd : RtpCmdEdit.values())
                 if (cmd.name().toLowerCase().startsWith(args[1].toLowerCase())) {
                     usage(sender, label, cmd);
                     return;
@@ -149,11 +149,11 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
     public List<String> tabComplete(CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
         if (args.length == 2) {
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values())
+            for (RtpCmdEdit cmd : RtpCmdEdit.values())
                 if (cmd.name().toLowerCase().startsWith(args[1].toLowerCase()))
                     list.add(cmd.name().toLowerCase());
         } else if (args.length == 3) { //rtp edit <sub_cmd> <type>
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values())
+            for (RtpCmdEdit cmd : RtpCmdEdit.values())
                 if (cmd.name().equalsIgnoreCase(args[1])) {
                     switch (cmd) {
                         case WorldType:
@@ -183,7 +183,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                     }
                 }
         } else if (args.length == 4) {
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values())
+            for (RtpCmdEdit cmd : RtpCmdEdit.values())
                 if (cmd.name().equalsIgnoreCase(args[1]))
                     switch (cmd) {
                         case CUSTOMWORLD:
@@ -195,9 +195,9 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                                     list.add(world.getName());
                             break;
                         case DEFAULT:
-                            if (args[2].equalsIgnoreCase(RTP_CMD_EDIT_SUB.CENTER_X.name()))
+                            if (args[2].equalsIgnoreCase(RtpCmdEditSub.CENTER_X.name()))
                                 list.add(String.valueOf(((Player) sender).getLocation().getBlockX()));
-                            else if (args[2].equalsIgnoreCase(RTP_CMD_EDIT_SUB.CENTER_Z.name()))
+                            else if (args[2].equalsIgnoreCase(RtpCmdEditSub.CENTER_Z.name()))
                                 list.add(String.valueOf(((Player) sender).getLocation().getBlockZ()));
                             break;
                         case WorldType:
@@ -227,16 +227,16 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                             break;
                     }
         } else if (args.length == 5) {
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values())
+            for (RtpCmdEdit cmd : RtpCmdEdit.values())
                 if (cmd.name().equalsIgnoreCase(args[1]))
                     switch (cmd) {
                         case CUSTOMWORLD:
                         case LOCATION:
-                            if (args[3].equalsIgnoreCase(RTP_CMD_EDIT_SUB.CENTER_X.name()))
+                            if (args[3].equalsIgnoreCase(RtpCmdEditSub.CENTER_X.name()))
                                 list.add(String.valueOf(((Player) sender).getLocation().getBlockX()));
-                            else if (args[3].equalsIgnoreCase(RTP_CMD_EDIT_SUB.CENTER_Z.name()))
+                            else if (args[3].equalsIgnoreCase(RtpCmdEditSub.CENTER_Z.name()))
                                 list.add(String.valueOf(((Player) sender).getLocation().getBlockZ()));
-                            else if (args[3].equalsIgnoreCase(RTP_CMD_EDIT_SUB.SHAPE.name()))
+                            else if (args[3].equalsIgnoreCase(RtpCmdEditSub.SHAPE.name()))
                                 for (RtpShape shape : RtpShape.values())
                                     list.add(shape.name().toLowerCase());
                             /*else if (args[3].equalsIgnoreCase(RTP_CMD_EDIT_SUB.BIOME_ADD.name()))
@@ -249,15 +249,15 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
                             list.addAll(tabCompleteSub(args, cmd)); break;
                     }
         } else if (args.length == 6) {
-            for (RTP_CMD_EDIT cmd : RTP_CMD_EDIT.values())
+            for (RtpCmdEdit cmd : RtpCmdEdit.values())
                 if (cmd.name().equalsIgnoreCase(args[1]))
                     switch (cmd) {
                         case PERMISSION_GROUP:
-                            if (args[4].equalsIgnoreCase(RTP_CMD_EDIT_SUB.CENTER_X.name()))
+                            if (args[4].equalsIgnoreCase(RtpCmdEditSub.CENTER_X.name()))
                                 list.add(String.valueOf(((Player) sender).getLocation().getBlockX()));
-                            else if (args[4].equalsIgnoreCase(RTP_CMD_EDIT_SUB.CENTER_Z.name()))
+                            else if (args[4].equalsIgnoreCase(RtpCmdEditSub.CENTER_Z.name()))
                                 list.add(String.valueOf(((Player) sender).getLocation().getBlockZ()));
-                            else if (args[4].equalsIgnoreCase(RTP_CMD_EDIT_SUB.SHAPE.name()))
+                            else if (args[4].equalsIgnoreCase(RtpCmdEditSub.SHAPE.name()))
                                 for (RtpShape shape : RtpShape.values())
                                     list.add(shape.name().toLowerCase());
                             break;
@@ -266,9 +266,9 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
         return list;
     }
 
-    private List<String> tabCompleteSub(String[] args, RTP_CMD_EDIT cmd) {
+    private List<String> tabCompleteSub(String[] args, RtpCmdEdit cmd) {
         List<String> list = new ArrayList<>();
-        for (RTP_CMD_EDIT_SUB sub_cmd : RTP_CMD_EDIT_SUB.values()) {
+        for (RtpCmdEditSub sub_cmd : RtpCmdEditSub.values()) {
 
             if (sub_cmd.name().toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
                 list.add(sub_cmd.name().toLowerCase());
@@ -281,7 +281,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
         return PermissionNode.EDIT;
     }
 
-    private void usage(CommandSender sendi, String label, RTP_CMD_EDIT type) {
+    private void usage(CommandSender sendi, String label, RtpCmdEdit type) {
         if (type != null)
             switch (type) {
                 case DEFAULT:
@@ -304,11 +304,11 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
     }
 
     @Override
-    public String getHelp() {
-        return MessagesHelp.EDIT.get();
+    public net.kyori.adventure.text.ComponentLike getHelp(org.bukkit.command.CommandSender sender, String label) {
+        return eu.mikart.cleanrtp.references.messages.Message.translatableRaw(sender, MessagesHelp.EDIT.key(), label);
     }
 
-    public enum RTP_CMD_EDIT {
+    public enum RtpCmdEdit {
         //Mapped
         CUSTOMWORLD,
         PERMISSION_GROUP,
@@ -320,7 +320,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
         BLACKLISTEDBLOCKS
     }
 
-    public enum RTP_CMD_EDIT_SUB { //Only for World and Default
+    public enum RtpCmdEditSub { //Only for World and Default
         CENTER_X("CenterX", "INT"),
         CENTER_Z("CenterZ", "INT"),
         MAXRAD("MaxRadius", "INT"),
@@ -335,7 +335,7 @@ public class CmdEdit implements RTPCommand, RTPCommandHelpable { //Edit a worlds
         private final String type;
         private final String str;
 
-        RTP_CMD_EDIT_SUB(String str, String type) {
+        RtpCmdEditSub(String str, String type) {
             this.str = str;
             this.type = type;
         }

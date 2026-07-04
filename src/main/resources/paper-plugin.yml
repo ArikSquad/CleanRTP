@@ -25,7 +25,7 @@ dependencies:
         Essentials: # /back support
             join-classpath: true
             required: false
-        PlaceholderAPI:
+        MiniPlaceholders:
             join-classpath: true
             required: false
         HuskClaims:

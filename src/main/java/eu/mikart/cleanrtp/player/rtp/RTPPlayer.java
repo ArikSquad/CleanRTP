@@ -97,7 +97,7 @@ public class RTPPlayer {
             } else {
                 if (worldPlayer.getPlayerInfo().applyCooldown)
                     getPl().getCooldowns().removeCooldown(player, worldPlayer.getWorld());
-                getPl().getPInfo().getRtping().remove(player);
+                getPl().getPInfo().getCurrentRtp().remove(player);
             }
         } else {
             randomlyTeleport(sendi);
@@ -109,7 +109,7 @@ public class RTPPlayer {
     private void metMax(CommandSender sendi, Player p) {
         settings.teleport.failedTeleport(p, sendi);
         getPl().getCooldowns().removeCooldown(p, worldPlayer.getWorld());
-        getPl().getPInfo().getRtping().remove(p);
+        getPl().getPInfo().getCurrentRtp().remove(p);
         //RTP Failed Event
         Bukkit.getServer().getPluginManager().callEvent(new RtpFailedEvent(this));
     }

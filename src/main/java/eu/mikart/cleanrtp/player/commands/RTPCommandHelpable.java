@@ -1,6 +1,9 @@
 package eu.mikart.cleanrtp.player.commands;
 
+import net.kyori.adventure.text.ComponentLike;
+import org.bukkit.command.CommandSender;
+
 public interface RTPCommandHelpable {
 
-    String getHelp();
+    ComponentLike getHelp(CommandSender sender, String label);
 }

@@ -17,7 +17,7 @@ dependencies {
     compileOnly("net.essentialsx:EssentialsX:2.20.1") {
         isTransitive = false
     }
-    compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly("io.github.miniplaceholders:miniplaceholders-api:3.2.0")
     compileOnly("com.github.angeschossen:LandsAPI:6.28.11") {
         isTransitive = false
     }
@@ -33,6 +33,7 @@ dependencies {
 
     implementation("xyz.xenondevs:particle:1.8.4")
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
+    implementation("de.exlll:configlib-yaml:4.8.1")
 }
 
 tasks {
@@ -43,7 +44,7 @@ tasks {
 
     processResources {
         filteringCharset = "UTF-8"
-        filesMatching("plugin.yml") {
+        filesMatching("paper-plugin.yml") {
             expand("version" to project.version)
         }
     }
@@ -53,6 +54,7 @@ tasks {
         relocate("com.tcoded.folialib", "me.superronancraft.betterrtp.lib.folialib")
         relocate("xyz.xenondevs.particle", "me.superronancraft.betterrtp.lib.particle")
         relocate("org.json.simple", "me.superronancraft.betterrtp.lib.jsonsimple")
+        relocate("de.exlll.configlib", "eu.mikart.cleanrtp.lib.configlib")
     }
 
     build {

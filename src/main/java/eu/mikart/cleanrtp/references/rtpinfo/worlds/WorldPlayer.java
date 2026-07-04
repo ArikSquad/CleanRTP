@@ -18,7 +18,8 @@ import java.util.*;
 
 public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     private boolean useWorldborder, RTPOnDeath;
-    private int CenterX, CenterZ, maxRad, minRad, price, min_y, max_y;
+    private int CenterX, CenterZ, maxRad, minRad, min_y, max_y;
+    private float price;
     private long cooldown;
     private List<String> Biomes;
     @Getter private final Player player;
@@ -27,6 +28,7 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     @Getter private final RtpType rtp_type;
     private final World world;
     private WorldType world_type;
+    @Getter
     public WorldPermissionGroup config = null;
     private RtpShape shape;
     public RtpSetupType setup_type = RtpSetupType.DEFAULT;
@@ -51,7 +53,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
             setup_type = RtpSetupType.PERMISSIONGROUP;
         this.setup_name = setup_name;
         setUseWorldBorder(world.getUseWorldborder());
-        setRTPOnDeath(world.getRTPOnDeath());
 
         //BetterRTP.getInstance().getLogger().info("WorldPlayer Center x: " + CenterX);
         setCenterX(world.getCenterX());
@@ -146,7 +147,7 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     }
 
     @Override
-    public int getPrice() {
+    public float getPrice() {
         return price;
     }
 
@@ -163,10 +164,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     @Override
     public void setUseWorldBorder(boolean bool) {
         useWorldborder = bool;
-    }
-
-    @Override public void setRTPOnDeath(boolean bool) {
-        RTPOnDeath = bool;
     }
 
     @Override
@@ -188,7 +185,7 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
         minRad = min;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 
@@ -224,10 +221,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
         this.cooldown = value;
     }
 
-    public WorldPermissionGroup getConfig() {
-        return this.config;
-    }
-
     public WorldType getWorldtype() {
         return this.world_type;
     }
@@ -244,10 +237,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     @Override
     public long getCooldown() {
         return cooldown;
-    }
-
-    @Override public boolean getRTPOnDeath() {
-        return RTPOnDeath;
     }
 
 }

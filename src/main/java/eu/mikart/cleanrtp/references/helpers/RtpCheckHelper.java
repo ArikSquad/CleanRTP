@@ -31,13 +31,11 @@ public class RtpCheckHelper {
         }
         if (rtpInfo.isTakeMoney() && !getPl().getEco().hasBalance(pWorld))
             return RtpErrorRequestReason.PRICE_ECONOMY;
-        if (rtpInfo.isTakeHunger() && !getPl().getEco().hasHunger(pWorld))
-            return RtpErrorRequestReason.PRICE_HUNGER;
         return null;
     }
 
     private static boolean isRTPing(Player player) {
-        return getPl().getPInfo().getRtping().getOrDefault(player, false);
+        return getPl().getPInfo().getCurrentRtp().getOrDefault(player, false);
     }
 
     public static boolean isCoolingDown(Player player, WorldPlayer pWorld) {
@@ -75,8 +73,8 @@ public class RtpCheckHelper {
     }
 
     public static boolean applyDelay(Player player) {
-        return getPl().getSettings().isDelayEnabled()
-                && getPl().getSettings().getDelayTime() > 0
+        return getPl().getSettings().getGeneral().getDelay().isEnabled()
+                && getPl().getSettings().getGeneral().getDelay().getTime() > 0
                 && !PermissionNode.BYPASS_DELAY.check(player);
     }
 

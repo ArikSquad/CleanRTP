@@ -1,6 +1,6 @@
 package eu.mikart.cleanrtp.references.messages;
 
-import eu.mikart.cleanrtp.references.file.FileData;
+import net.kyori.adventure.text.Component;
 
 public interface MessageData {
 
@@ -8,9 +8,11 @@ public interface MessageData {
 
     String prefix();
 
-    FileData file();
+    default String key() {
+        return "cleanrtp." + prefix().toLowerCase() + section().toLowerCase();
+    }
 
-    default String get() {
-        return file().getString(prefix() + section());
+    default Component getComponent() {
+        return Component.translatable(key());
     }
 }

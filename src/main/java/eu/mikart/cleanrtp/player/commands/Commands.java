@@ -110,7 +110,7 @@ public class Commands {
     }
 
     public void registerCommand(RTPCommand cmd, boolean forced) {
-        if (!cmd.isDebugOnly() || pl.getSettings().isDebug() || forced) //If debug only, can it be enabled?
+        if (!cmd.isDebugOnly() || pl.getSettings().getGeneral().isDebug() || forced) //If debug only, can it be enabled?
             commands.add(cmd);
     }
 

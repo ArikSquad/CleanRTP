@@ -1,144 +1,96 @@
 package eu.mikart.cleanrtp.references.messages;
 
-import com.google.common.collect.ImmutableCollection;
-import lombok.NonNull;
-import eu.mikart.cleanrtp.references.file.FileData;
 import eu.mikart.cleanrtp.references.messages.placeholder.PlaceholderAnalyzer;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public interface Message {
+    MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
-    FileData lang();
-
-    static void sms(Message messenger, CommandSender sendi, String msg) {
-        if (!msg.isEmpty())
-            AsyncHandler.sync(() ->
-                    sendi.sendMessage(placeholder(sendi, getPrefix(messenger) + msg)));
-    }
-
-    static void sms(Message messenger, CommandSender sendi, String msg, Object placeholderInfo) {
-        if (!msg.isEmpty())
-            AsyncHandler.sync(() ->
-                    sendi.sendMessage(Objects.requireNonNull(placeholder(sendi, getPrefix(messenger) + msg, placeholderInfo))));
-    }
-
-    static void sms(Message messenger, CommandSender sendi, String msg, List<Object> placeholderInfo) {
-        if (!msg.isEmpty())
-            AsyncHandler.sync(() ->
-                    sendi.sendMessage(placeholder(sendi, getPrefix(messenger) + msg, placeholderInfo)));
-    }
-
-    static void sms(CommandSender sendi, List<String> msg, Object placeholderInfo) {
-        if (msg != null && !msg.isEmpty()) {
-            AsyncHandler.sync(() -> {
-                msg.forEach(str -> msg.set(msg.indexOf(str), placeholder(sendi, str, placeholderInfo)));
-                sendi.sendMessage(msg.toArray(new String[0]));
-            });
+    static void sms(CommandSender sender, String legacyMiniMessage) {
+        if (legacyMiniMessage != null && !legacyMiniMessage.isEmpty()) {
+            AsyncHandler.sync(() -> sender.sendMessage(component(legacyMiniMessage, sender)));
         }
     }
 
-    /*static void smsActionBar(Player sendi, List<String> msg) {
-        if (msg == null || msg.isEmpty()) return;
-        String str = msg.get(new Random().nextInt(msg.size()));
-        smsActionBar(sendi, str);
-    }
-
-    static void smsActionBar(Player sendi, String msg) {
-        if (msg == null || msg.isEmpty()) return;
-        Audience audience = BetterRTP.getInstance().getAdventure().player(sendi);
-        audience.sendActionBar(Component.text(msg));
-        //sendi.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
-    }*/
-
-    /*static void smsTitle(Player sendi, List<String> msg) {
-        if (msg == null || msg.isEmpty()) return;
-        Audience audience = BetterRTP.getInstance().getAdventure().player(sendi);
-        if (msg.size() == 1)
-            audience.showTitle(Title.title(Component.text(" "), Component.text(msg.get(0))));
-        else
-            audience.showTitle(Title.title(Component.text(msg.get(0)), Component.text(msg.get(1))));
-    }*/
-
-    static String getPrefix(Message messenger) {
-        return messenger.lang().getString("Messages.Prefix");
-    }
-
-    /**
-     * @param info: Accepts String, PersistentDataContainer
-     * **/
-    static List<String> placeholder(@Nullable CommandSender p, List<String> str, Object info) {
-        if (str instanceof ImmutableCollection)
-            return str;
-        for (int i = 0; i < str.size(); i++) {
-            String s = placeholder(p, str.get(i), info);
-            if (s != null)
-                str.set(i, s);
-            else {
-                str.remove(i);
-                i--;
-            }
+    static void sms(CommandSender sender, String legacyMiniMessage, Object info) {
+        if (legacyMiniMessage != null && !legacyMiniMessage.isEmpty()) {
+            AsyncHandler.sync(() -> sender.sendMessage(component(legacyMiniMessage, sender, info)));
         }
-        //str.forEach(s -> str.set(str.indexOf(s), placeholder(p, s, info)));
-        return str;
     }
 
-    @Nullable
-    static String placeholder(@Nullable CommandSender p, String str, @Nullable Object info) {
-        if (info instanceof Collection<?>)
-            str = placeholder(p, str, Collections.unmodifiableList((List<?>) info));
-        else if (str != null)
-            str = PlaceholderAnalyzer.applyPlaceholders(p, str, info);
-        if (str != null)
-            return color(str);
-        return null;
+    static void sms(CommandSender sender, ComponentLike component) {
+        AsyncHandler.sync(() -> sender.sendMessage(component.asComponent()));
     }
 
-    static String placeholder(@Nullable CommandSender p, String str, @NonNull List<Object> info) {
-        for (Object obj : info)
-            str = placeholder(p, str, obj);
-        return str;
-    }
-
-    static String placeholder(@Nullable CommandSender p, String str) {
-        if (str != null)
-            str = PlaceholderAnalyzer.applyPlaceholders(p, str, null);
-        if (str != null)
-            return color(str);
-        return null;
-    }
-
-    static String color(String str) {
-        return translateHexColorCodes(str);
-    }
-
-    //Thank you to zwrumpy on Spigot! (https://www.spigotmc.org/threads/hex-color-code-translate.449748/#post-4270781)
-    //Supports 1.8 to 1.18
-    static String translateHexColorCodes(String message) {
-        Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
-        Matcher matcher = pattern.matcher(message);
-        while (matcher.find()) {
-            String hexCode = message.substring(matcher.start(), matcher.end());
-            String replaceSharp = hexCode.replace('#', 'x');
-
-            char[] ch = replaceSharp.toCharArray();
-            StringBuilder builder = new StringBuilder("");
-            for (char c : ch) {
-                builder.append("&").append(c);
-            }
-
-            message = message.replace(hexCode, builder.toString());
-            matcher = pattern.matcher(message);
+    static void sms(CommandSender sender, List<ComponentLike> components) {
+        if (components != null && !components.isEmpty()) {
+            AsyncHandler.sync(() -> components.forEach(component -> sender.sendMessage(component.asComponent())));
         }
-        return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    static Component translatable(CommandSender sender, String key, @Nullable Object info) {
+        List<ComponentLike> args = PlaceholderAnalyzer.arguments(sender, info);
+        return prefixed(Component.translatable(key, args));
+    }
+
+    static Component translatableRaw(CommandSender sender, String key, @Nullable Object info) {
+        return Component.translatable(key, PlaceholderAnalyzer.arguments(sender, info));
+    }
+
+    static Component prefixed(ComponentLike component) {
+        return Component.translatable("cleanrtp.messages.prefix").append(component.asComponent());
+    }
+
+    static Component component(String value, @Nullable CommandSender sender, Object... namedValues) {
+        String mini = legacyToMini(value);
+        if (namedValues.length == 1) {
+            return MINI_MESSAGE.deserialize(mini, PlaceholderAnalyzer.tagResolver(sender, namedValues[0]));
+        }
+        return MINI_MESSAGE.deserialize(mini, PlaceholderAnalyzer.tagResolver(sender, null, namedValues));
+    }
+
+    static List<ComponentLike> components(Collection<String> values, @Nullable CommandSender sender) {
+        return values.stream().map(value -> component(value, sender)).map(ComponentLike.class::cast).toList();
+    }
+
+    static String legacyString(String value, @Nullable CommandSender sender) {
+        return LegacyComponentSerializer.legacySection().serialize(component(value, sender));
+    }
+
+    static String legacyToMini(String value) {
+        String result = value.replace("<", "\\<").replace(">", "\\>");
+        result = result.replaceAll("#([A-Fa-f0-9]{6})", "<#$1>");
+        result = result.replace("&0", "<black>")
+                .replace("&1", "<dark_blue>")
+                .replace("&2", "<dark_green>")
+                .replace("&3", "<dark_aqua>")
+                .replace("&4", "<dark_red>")
+                .replace("&5", "<dark_purple>")
+                .replace("&6", "<gold>")
+                .replace("&7", "<gray>")
+                .replace("&8", "<dark_gray>")
+                .replace("&9", "<blue>")
+                .replace("&a", "<green>")
+                .replace("&b", "<aqua>")
+                .replace("&c", "<red>")
+                .replace("&d", "<light_purple>")
+                .replace("&e", "<yellow>")
+                .replace("&f", "<white>")
+                .replace("&k", "<obfuscated>")
+                .replace("&l", "<bold>")
+                .replace("&m", "<strikethrough>")
+                .replace("&n", "<underlined>")
+                .replace("&o", "<italic>")
+                .replace("&r", "<reset>");
+        return result.replaceAll("%([A-Za-z0-9_]+)%", "<$1>");
     }
 }

@@ -30,4 +30,7 @@ public enum Placeholders {
         this.name = "%" + name + "%";
     }
 
+    public String key() {
+        return name.substring(1, name.length() - 1);
+    }
 }

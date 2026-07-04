@@ -8,8 +8,7 @@ public enum RtpErrorRequestReason {
     NO_PERMISSION(MessagesCore.NOPERMISSION_WORLD),
     WORLD_DISABLED(MessagesCore.DISABLED_WORLD),
     COOLDOWN(MessagesCore.COOLDOWN),
-    PRICE_ECONOMY(MessagesCore.FAILED_PRICE),
-    PRICE_HUNGER(MessagesCore.FAILED_HUNGER);
+    PRICE_ECONOMY(MessagesCore.FAILED_PRICE);
 
     @Getter private final MessagesCore msg;
 

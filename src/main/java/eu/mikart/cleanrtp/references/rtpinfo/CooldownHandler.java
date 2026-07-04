@@ -15,7 +15,6 @@ import lombok.Getter;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.references.database.DatabaseCooldowns;
 import eu.mikart.cleanrtp.references.database.DatabaseHandler;
-import eu.mikart.cleanrtp.references.file.FileOther;
 import eu.mikart.cleanrtp.references.player.HelperPlayer;
 import eu.mikart.cleanrtp.references.player.playerdata.PlayerData;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldPlayer;
@@ -31,15 +30,15 @@ public class CooldownHandler {
 
     public void load() {
         //configfile = new File(BetterRTP.getInstance().getDataFolder(), "data/cooldowns.yml");
-        FileOther.Filetype config = FileOther.Filetype.CONFIG;
-        enabled = config.getBoolean("Settings.Cooldown.Enabled");
+        var config = BetterRTP.getInstance().getSettings().getGeneral().getCooldown();
+        enabled = config.isEnabled();
         downloading.clear();
         loaded = false;
         if (enabled) {
-            defaultCooldownTime = config.getInt("Settings.Cooldown.Time");
+            defaultCooldownTime = config.getTime();
             BetterRTP.debug("Cooldown = " + defaultCooldownTime);
-            lockedAfter = config.getInt("Settings.Cooldown.LockAfter");
-            cooldownByWorld = config.getBoolean("Settings.Cooldown.PerWorld");
+            lockedAfter = config.getLockAfter();
+            cooldownByWorld = config.isPerWorld();
         }
         queueDownload();
     }
@@ -176,51 +175,3 @@ public class CooldownHandler {
         return HelperPlayer.getData(p);
     }
 }
-
-//Old yaml file based system, no longer useful as of 3.3.1
-/*@Deprecated
-    static class OldCooldownConverter {
-
-        static void loadOldCooldowns() {
-            File file = new File(BetterRTP.getInstance().getDataFolder(), "data/cooldowns.yml");
-            YamlConfiguration config = getFile(file);
-            if (config == null) return;
-            if (config.getBoolean("Converted")) return;
-            List<CooldownData> cooldownData = new ArrayList<>();
-            for (String id : config.getConfigurationSection("").getKeys(false)) {
-                try {
-                    Long time = config.getLong(id + ".Time");
-                    UUID uuid = UUID.fromString(id);
-                    int uses = config.getInt(id + ".Attempts");
-                    cooldownData.add(new CooldownData(uuid, time, uses));
-                } catch (IllegalArgumentException e) {
-                    //Invalid UUID
-                }
-            }
-            config.set("Converted", true);
-            try {
-                config.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            BetterRTP.getInstance().getLogger().info("Cooldowns converting to new database...");
-            Bukkit.getScheduler().runTaskAsynchronously(BetterRTP.getInstance(), () -> {
-                BetterRTP.getInstance().getDatabaseCooldowns().setCooldown(cooldownData);
-                BetterRTP.getInstance().getLogger().info("Cooldowns have been converted to the new database!");
-            });
-        }
-
-        private static YamlConfiguration getFile(File configfile) {
-            if (!configfile.exists()) {
-                return null;
-            }
-            try {
-                YamlConfiguration config = new YamlConfiguration();
-                config.load(configfile);
-                return config;
-            } catch (IOException | InvalidConfigurationException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }*/

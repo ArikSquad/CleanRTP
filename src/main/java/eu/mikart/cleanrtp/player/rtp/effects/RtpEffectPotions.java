@@ -1,7 +1,6 @@
 package eu.mikart.cleanrtp.player.rtp.effects;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.file.FileOther;
 import eu.mikart.cleanrtp.references.player.HelperPlayer;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 import org.bukkit.entity.Player;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class RtpEffectPotions { //Potions AND Invincibility
+public class RtpEffectPotions {
 
     private boolean potionEnabled;
     private final HashMap<PotionEffectType, Integer[]> potionEffects = new HashMap<>();
@@ -21,16 +20,15 @@ public class RtpEffectPotions { //Potions AND Invincibility
 
     void load() {
         potionEffects.clear();
-        FileOther.Filetype config = FileOther.Filetype.EFFECTS;
         //Invincible
-        invincibleEnabled = config.getBoolean("Invincible.Enabled");
+        invincibleEnabled = BetterRTP.getInstance().getSettings().getGeneral().getEffects().isInvicible();
         if (invincibleEnabled)
-            invincibleTime = config.getInt("Invincible.Seconds");
+            invincibleTime = BetterRTP.getInstance().getSettings().getGeneral().getEffects().getInvicibleSeconds();
 
         //Potions
-        potionEnabled = config.getBoolean("Potions.Enabled");
+        potionEnabled =BetterRTP.getInstance().getSettings().getGeneral().getEffects().isPotions();
         if (potionEnabled) {
-            List<String> list = config.getStringList("Potions.Types");
+            List<String> list = BetterRTP.getInstance().getSettings().getGeneral().getEffects().getPotionsList();
             for (String p : list) {
                 String[] ary = p.replaceAll(" ", "").split(":");
                 String type = ary[0].trim();

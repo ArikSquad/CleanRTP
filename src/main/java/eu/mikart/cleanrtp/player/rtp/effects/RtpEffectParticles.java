@@ -1,7 +1,7 @@
 package eu.mikart.cleanrtp.player.rtp.effects;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.file.FileOther;
+import eu.mikart.cleanrtp.config.Settings;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -33,17 +33,11 @@ public class RtpEffectParticles {
             };
 
     void load() {
-        FileOther.Filetype config = getPl().getFiles().getType(FileOther.Filetype.EFFECTS);
-        enabled = config.getBoolean("Particles.Enabled");
+        Settings.Effects config = BetterRTP.getInstance().getSettings().getGeneral().getEffects();
+        enabled = config.isParticles();
         if (!enabled) return;
         //Enabled? Load all this junk
-        List<String> types;
-        if (config.isList("Particles.Type"))
-            types = config.getStringList("Particles.Type");
-        else {
-            types = new ArrayList<>();
-            types.add(config.getString("Particles.Type"));
-        }
+        List<String> types = config.getParticlesList();
         String typeTrying = null;
         try {
             for (String type : types) {
@@ -60,7 +54,7 @@ public class RtpEffectParticles {
             getPl().getLogger().severe("The particle '" + typeTrying + "' created a fatal error when loading particles! Your MC version isn't supported!");
             enabled = false;
         }
-        shape = config.getString("Particles.Shape").toUpperCase();
+        shape = config.getParticleShape().toUpperCase();
         if (!Arrays.asList(shapeTypes).contains(shape)) {
             getPl().getLogger().severe("The particle shape '" + shape + "' doesn't exist! Default particle shape enabled...");
             getPl().getLogger().severe("Try using '/rtp info shapes' to get a list of shapes, or: " + Arrays.asList(shapeTypes));

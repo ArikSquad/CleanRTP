@@ -2,20 +2,14 @@ package eu.mikart.cleanrtp.player.commands.types;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.commands.RTPCommand;
@@ -27,17 +21,14 @@ import eu.mikart.cleanrtp.references.PermissionCheck;
 import eu.mikart.cleanrtp.references.PermissionNode;
 import eu.mikart.cleanrtp.references.helpers.RtpHelper;
 import eu.mikart.cleanrtp.references.messages.Message;
-import eu.mikart.cleanrtp.references.messages.RtpMessage;
 import eu.mikart.cleanrtp.references.messages.MessagesCore;
 import eu.mikart.cleanrtp.references.messages.MessagesHelp;
 import eu.mikart.cleanrtp.references.rtpinfo.QueueHandler;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldDefault;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldPlayer;
-import eu.mikart.cleanrtp.references.web.LogUploader;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import xyz.xenondevs.particle.ParticleEffect;
 
 public class CmdInfo implements RTPCommand, RTPCommandHelpable {
@@ -96,8 +87,8 @@ public class CmdInfo implements RTPCommand, RTPCommandHelpable {
     }
 
     @Override
-    public String getHelp() {
-        return MessagesHelp.INFO.get();
+    public net.kyori.adventure.text.ComponentLike getHelp(org.bukkit.command.CommandSender sender, String label) {
+        return eu.mikart.cleanrtp.references.messages.Message.translatableRaw(sender, MessagesHelp.INFO.key(), label);
     }
 
     enum CmdInfoSub { //Sub commands, future expansions
@@ -116,9 +107,7 @@ public class CmdInfo implements RTPCommand, RTPCommandHelpable {
                 info.add("&f" + eff.name() + "&r");
         }
 
-        info.forEach(str ->
-                info.set(info.indexOf(str), Message.color(str)));
-        sendi.sendMessage(info.toString());
+        sendi.sendMessage(Message.component(info.toString(), sendi));
     }
 
     //Shapes
@@ -132,45 +121,32 @@ public class CmdInfo implements RTPCommand, RTPCommandHelpable {
                 info.add("&f" + shape + "&r");
         }
 
-        info.forEach(str ->
-                info.set(info.indexOf(str), Message.color(str)));
-        sendi.sendMessage(info.toString());
+        sendi.sendMessage(Message.component(info.toString(), sendi));
     }
 
     //World
     public static void sendInfoWorld(CommandSender sendi, List<String> list, String label, String[] args) { //Send info
         boolean upload = Arrays.asList(args).contains("_UPLOAD_");
         list.add(0, "&e&m-----&6 BetterRTP &8| Info &e&m-----");
-        list.forEach(str -> list.set(list.indexOf(str), Message.color(str)));
 
         String cmd = "/" + label + " " + String.join(" ", args);
         if (!upload) {
-            sendi.sendMessage(list.toArray(new String[0]));
-            if (sendi instanceof Player) {
-                TextComponent component = new TextComponent(Message.color("&7- &7Click to upload command log to &flogs.ronanplugins.com"));
-                component.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, cmd + " _UPLOAD_"));
-                component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Message.color("&6Suggested command&f: &7" + "/betterrtp " + String.join(" ", args) + " _UPLOAD_")).create()));
-                ((Player) sendi).spigot().sendMessage(component);
+            Message.components(list, sendi).forEach(component -> sendi.sendMessage(component.asComponent()));
+            if (sendi instanceof Player player) {
+                player.sendMessage(Message.component("&7- &7Click to upload command log to &flogs.ronanplugins.com", player)
+                        .clickEvent(ClickEvent.suggestCommand(cmd + " _UPLOAD_"))
+                        .hoverEvent(HoverEvent.showText(Message.component("&6Suggested command&f: &7" + cmd + " _UPLOAD_", player))));
             } else {
-                sendi.sendMessage("Execute `" + cmd + " _UPLOAD_`" + " to upload command log to https://logs.ronanplugins.com");
+                sendi.sendMessage(Component.text("Execute `" + cmd + " _UPLOAD_` to upload command log to https://logs.ronanplugins.com"));
             }
         } else {
             list.add(0, "Command: " + cmd);
-            list.forEach(str -> list.set(list.indexOf(str), ChatColor.stripColor(str)));
-            CompletableFuture.runAsync(() -> {
-                String key = LogUploader.post(list);
-                if (key == null) {
-                    Message.sms(sendi, new ArrayList<>(Collections.singletonList("&cAn error occured attempting to upload log!")), null);
-                } else {
-                    try {
-                        JSONObject json = (JSONObject) new JSONParser().parse(key);
-                        Message.sms(sendi, Arrays.asList(" ", Message.getPrefix(RtpMessage.msg) + "&aLog uploaded! &fView&7: &6https://logs.ronanplugins.com/" + json.get("key")), null);
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+            list.replaceAll(CmdInfo::stripLegacyColor);
         }
+    }
+
+    private static String stripLegacyColor(String value) {
+        return value.replaceAll("&[0-9A-Fa-fK-Ok-oRr]", "");
     }
 
     private void infoWorld(CommandSender sendi, String label, String[] args) { //All worlds
@@ -255,9 +231,7 @@ public class CmdInfo implements RTPCommand, RTPCommandHelpable {
                 info.add("&f" + effect.getName() + "&r");
         }
 
-        info.forEach(str ->
-                info.set(info.indexOf(str), Message.color(str)));
-        sendi.sendMessage(info.toString());
+        sendi.sendMessage(Message.component(info.toString(), sendi));
     }
 
     public List<String> tabComplete(CommandSender sender, String[] args) {
