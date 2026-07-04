@@ -1,7 +1,8 @@
 package eu.mikart.cleanrtp.references.helpers;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.player.commands.types.CmdEdit;
+import eu.mikart.cleanrtp.player.commands.EditCommandType;
+import eu.mikart.cleanrtp.player.commands.EditCommandSetting;
 import eu.mikart.cleanrtp.references.messages.MessagesCore;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldType;
 import net.kyori.adventure.text.minimessage.translation.Argument;
@@ -9,7 +10,7 @@ import org.bukkit.command.CommandSender;
 
 public class RtpEditWorldsHelper {
 
-    public static void editCustomWorld(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String world, String val) {
+    public static void editCustomWorld(CommandSender sendi, EditCommandSetting cmd, String world, String val) {
         Object value = parseEditValue(sendi, cmd, val);
         if (value == null) return;
         BetterRTP.getInstance().getSettings().setCustomWorldValue(world, cmd, value);
@@ -17,12 +18,12 @@ public class RtpEditWorldsHelper {
         MessagesCore.EDIT_SET.send(sendi, Argument.string("type", cmd.get()), Argument.string("value", val));
     }
 
-    public static void editLocation(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String location, String val) {
+    public static void editLocation(CommandSender sendi, EditCommandSetting cmd, String location, String val) {
         if (editSingleMap(sendi, cmd, location, val))
             BetterRTP.getInstance().getRTP().loadLocations();
     }
 
-    private static boolean editSingleMap(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String field, String val) {
+    private static boolean editSingleMap(CommandSender sendi, EditCommandSetting cmd, String field, String val) {
         Object value = parseEditValue(sendi, cmd, val);
         if (value == null) return false;
 
@@ -31,7 +32,7 @@ public class RtpEditWorldsHelper {
         return true;
     }
 
-    public static void editPermissionGroup(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String group, String world, String val) {
+    public static void editPermissionGroup(CommandSender sendi, EditCommandSetting cmd, String group, String world, String val) {
         Object value = parseEditValue(sendi, cmd, val);
         if (value == null) return;
 
@@ -43,7 +44,7 @@ public class RtpEditWorldsHelper {
         }
     }
 
-    public static void editDefault(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String val) {
+    public static void editDefault(CommandSender sendi, EditCommandSetting cmd, String val) {
         Object value = parseEditValue(sendi, cmd, val);
         if (value == null) return;
 
@@ -63,7 +64,7 @@ public class RtpEditWorldsHelper {
 
         BetterRTP.getInstance().getSettings().setWorldType(world, type.name());
         BetterRTP.getInstance().getRTP().load();
-        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", CmdEdit.RtpCmdEdit.WorldType.name()), Argument.string("value", val));
+        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", EditCommandType.WorldType.name()), Argument.string("value", val));
     }
 
     public static void editOverride(CommandSender sendi, String world, String val) {
@@ -74,7 +75,7 @@ public class RtpEditWorldsHelper {
         }
 
         BetterRTP.getInstance().getRTP().load();
-        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", CmdEdit.RtpCmdEdit.OVERRIDE.name()), Argument.string("value", messageValue));
+        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", EditCommandType.OVERRIDE.name()), Argument.string("value", messageValue));
     }
 
     public static void editBlacklisted(CommandSender sendi, String block, boolean add) {
@@ -82,10 +83,10 @@ public class RtpEditWorldsHelper {
         String messageValue = add ? block : "(removed " + block + ")";
 
         BetterRTP.getInstance().getRTP().load();
-        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", CmdEdit.RtpCmdEdit.BLACKLISTEDBLOCKS.name()), Argument.string("value", messageValue));
+        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", EditCommandType.BLACKLISTEDBLOCKS.name()), Argument.string("value", messageValue));
     }
 
-    private static Object parseEditValue(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String val) {
+    private static Object parseEditValue(CommandSender sendi, EditCommandSetting cmd, String val) {
         try {
             Object value = cmd.getResult(val);
             if (value != null) return value;

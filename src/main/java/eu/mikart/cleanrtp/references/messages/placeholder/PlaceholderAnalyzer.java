@@ -1,6 +1,6 @@
 package eu.mikart.cleanrtp.references.messages.placeholder;
 
-import eu.mikart.cleanrtp.player.commands.RTPCommand;
+import eu.mikart.cleanrtp.player.commands.CommandMeta;
 import eu.mikart.cleanrtp.references.PermissionCheck;
 import eu.mikart.cleanrtp.references.PermissionNode;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
@@ -60,7 +60,7 @@ public class PlaceholderAnalyzer {
             addWorldPlayer(args, worldPlayer);
         } else if (info instanceof World world) {
             addWorld(args, world);
-        } else if (info instanceof RTPCommand command) {
+        } else if (info instanceof CommandMeta command) {
             addPermission(args, command.permission());
         } else if (info instanceof PermissionNode permissionNode) {
             addPermission(args, permissionNode);
@@ -160,7 +160,7 @@ public class PlaceholderAnalyzer {
             tag(builder, Placeholders.PLAYER_NAME.key(), worldPlayer.getPlayer().getName());
         } else if (info instanceof World world) {
             tag(builder, Placeholders.WORLD.key(), world.getName());
-        } else if (info instanceof RTPCommand command) {
+        } else if (info instanceof CommandMeta command) {
             tag(builder, Placeholders.PERMISSION.key(), command.permission().getNode());
         } else if (info instanceof PermissionNode permissionNode) {
             tag(builder, Placeholders.PERMISSION.key(), permissionNode.getNode());

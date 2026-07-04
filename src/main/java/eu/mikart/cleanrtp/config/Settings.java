@@ -6,7 +6,7 @@ import de.exlll.configlib.Ignore;
 import de.exlll.configlib.YamlConfigurationProperties;
 import de.exlll.configlib.YamlConfigurations;
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.player.commands.types.CmdEdit;
+import eu.mikart.cleanrtp.player.commands.EditCommandSetting;
 import eu.mikart.cleanrtp.player.rtp.RtpShape;
 import eu.mikart.cleanrtp.references.settings.SoftDepends;
 import lombok.Getter;
@@ -155,24 +155,24 @@ public final class Settings {
         return Optional.empty();
     }
 
-    public void setDefaultValue(CmdEdit.RtpCmdEditSub cmd, Object value) {
+    public void setDefaultValue(EditCommandSetting cmd, Object value) {
         defaultWorld.set(cmd, value);
         save();
     }
 
-    public void setCustomWorldValue(String world, CmdEdit.RtpCmdEditSub cmd, Object value) {
+    public void setCustomWorldValue(String world, EditCommandSetting cmd, Object value) {
         getOrCreateCustomWorld(world).set(cmd, value);
         save();
     }
 
-    public boolean setPermissionGroupValue(String group, String world, CmdEdit.RtpCmdEditSub cmd, Object value) {
+    public boolean setPermissionGroupValue(String group, String world, EditCommandSetting cmd, Object value) {
         Optional<WorldOverrideSettings> settings = findPermissionGroupWorld(group, world);
         settings.ifPresent(worldSettings -> worldSettings.set(cmd, value));
         if (settings.isPresent()) save();
         return settings.isPresent();
     }
 
-    public void setLocationValue(String location, CmdEdit.RtpCmdEditSub cmd, Object value) {
+    public void setLocationValue(String location, EditCommandSetting cmd, Object value) {
         locations.entries.computeIfAbsent(location, ignored -> new LocationEntry()).set(cmd, value);
         save();
     }
@@ -399,7 +399,7 @@ public final class Settings {
         @Comment("Optional")
         public float price = 0;
 
-        public void set(CmdEdit.RtpCmdEditSub cmd, Object value) {
+        public void set(EditCommandSetting cmd, Object value) {
             switch (cmd) {
                 case CENTER_X -> centerX = (int) value;
                 case CENTER_Z -> centerZ = (int) value;
@@ -604,7 +604,7 @@ public final class Settings {
         private int minY = 0;
         private boolean rtpOnDeath = false;
 
-        public void set(CmdEdit.RtpCmdEditSub cmd, Object value) {
+        public void set(EditCommandSetting cmd, Object value) {
             switch (cmd) {
                 case CENTER_X -> centerX = (int) value;
                 case CENTER_Z -> centerZ = (int) value;
@@ -687,7 +687,7 @@ public final class Settings {
             return settings;
         }
 
-        public void set(CmdEdit.RtpCmdEditSub cmd, Object value) {
+        public void set(EditCommandSetting cmd, Object value) {
             switch (cmd) {
                 case CENTER_X -> centerX = (int) value;
                 case CENTER_Z -> centerZ = (int) value;

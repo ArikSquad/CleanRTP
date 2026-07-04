@@ -34,6 +34,9 @@ dependencies {
     implementation("xyz.xenondevs:particle:1.8.4")
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
     implementation("de.exlll:configlib-yaml:4.8.1")
+    implementation("io.github.revxrsal:lamp.bukkit:4.0.0-rc.17")
+    implementation("io.github.revxrsal:lamp.common:4.0.0-rc.17")
+    implementation("io.github.revxrsal:lamp.brigadier:4.0.0-rc.17")
 }
 
 tasks {
@@ -55,6 +58,7 @@ tasks {
         relocate("xyz.xenondevs.particle", "me.superronancraft.betterrtp.lib.particle")
         relocate("org.json.simple", "me.superronancraft.betterrtp.lib.jsonsimple")
         relocate("de.exlll.configlib", "eu.mikart.cleanrtp.lib.configlib")
+        relocate("revxrsal.commands", "eu.mikart.cleanrtp.lib.lamp")
     }
 
     build {

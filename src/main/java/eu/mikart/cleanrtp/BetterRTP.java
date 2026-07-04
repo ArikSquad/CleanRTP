@@ -2,7 +2,7 @@ package eu.mikart.cleanrtp;
 
 import lombok.Getter;
 import eu.mikart.cleanrtp.player.PlayerInfo;
-import eu.mikart.cleanrtp.player.commands.Commands;
+import eu.mikart.cleanrtp.player.commands.CommandRegistrar;
 import eu.mikart.cleanrtp.player.events.EventListener;
 import eu.mikart.cleanrtp.player.rtp.RTP;
 import eu.mikart.cleanrtp.references.Permissions;
@@ -22,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BetterRTP extends JavaPlugin {
     @Getter private final Permissions perms = new Permissions();
     @Getter private final DepEconomy eco = new DepEconomy();
-    @Getter private final Commands cmd = new Commands(this);
+    @Getter private final CommandRegistrar cmd = new CommandRegistrar(this);
     @Getter private final RTP RTP = new RTP();
     private final EventListener listener = new EventListener();
     @Getter private static BetterRTP instance;
@@ -40,7 +40,7 @@ public class BetterRTP extends JavaPlugin {
     public void onEnable() {
         instance = this;
         loadAll();
-        cmd.registerPaperCommands();
+        cmd.registerCommands();
         listener.registerEvents(this);
         queue.registerEvents(this);
         registerMiniPlaceholders();
@@ -77,7 +77,6 @@ public class BetterRTP extends JavaPlugin {
         databaseHandler.load();
         rtpLogger.setup(this);
         RTP.load();
-        cmd.load();
         listener.load();
         eco.load();
         perms.register();

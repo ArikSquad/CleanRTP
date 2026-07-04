@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.player.commands.types.CmdLocation;
+import eu.mikart.cleanrtp.player.commands.LocationAccess;
 import eu.mikart.cleanrtp.player.rtp.RTP;
 import eu.mikart.cleanrtp.player.rtp.RTPSetupInformation;
 import eu.mikart.cleanrtp.player.rtp.RtpErrorRequestReason;
@@ -140,7 +140,7 @@ public class RtpHelper {
     @Nullable
     public static WorldLocation getRandomLocation(CommandSender sender,
                                                   World world) {
-        HashMap<String, RTPWorld> locations_permissible = CmdLocation.getLocations(sender, world);
+        HashMap<String, RTPWorld> locations_permissible = LocationAccess.getLocations(sender, world);
         if (!locations_permissible.isEmpty()) {
             List<String> valuesList = new ArrayList<>(locations_permissible.keySet());
             String randomIndex = valuesList.get(new Random().nextInt(valuesList.size()));

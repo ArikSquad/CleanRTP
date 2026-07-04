@@ -1,6 +1,6 @@
 package eu.mikart.cleanrtp.player.events.custom;
 
-import eu.mikart.cleanrtp.player.commands.RTPCommand;
+import eu.mikart.cleanrtp.player.commands.CommandMeta;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -9,11 +9,11 @@ public class RtpCommandEvent extends RTPEvent implements Cancellable {
 
     boolean cancelled;
     CommandSender sendi;
-    RTPCommand cmd;
+    CommandMeta cmd;
     private static final HandlerList handler = new HandlerList();
 
     //Called before a command is executed
-    public RtpCommandEvent(CommandSender sendi, RTPCommand cmd) {
+    public RtpCommandEvent(CommandSender sendi, CommandMeta cmd) {
         this.sendi = sendi;
         this.cmd = cmd;
     }
@@ -22,7 +22,7 @@ public class RtpCommandEvent extends RTPEvent implements Cancellable {
         return sendi;
     }
 
-    public RTPCommand getCmd() {
+    public CommandMeta getCmd() {
         return cmd;
     }
 
