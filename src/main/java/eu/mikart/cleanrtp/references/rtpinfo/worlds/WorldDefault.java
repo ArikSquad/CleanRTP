@@ -49,13 +49,12 @@ public class WorldDefault implements RTPWorld {
         if (BetterRTP.getInstance().getSettings().getGeneral().getEconomy().isEnabled()) {
             price = BetterRTP.getInstance().getSettings().getGeneral().getEconomy().getPrice();
             if (BetterRTP.getInstance().getSettings().isCustomWorldsEnabled()) {
-                List<Map<?, ?>> world_map = BetterRTP.getInstance().getSettings().getCustomWorlds();
-                for (Map<?, ?> m : world_map)
-                    for (Map.Entry<?, ?> entry : m.entrySet()) {
-                        String _world = entry.getKey().toString();
-                        if (entry.getValue().getClass() == Integer.class)
-                            prices.put(_world, Integer.parseInt((entry.getValue().toString())));
+                for (Map.Entry<String, Settings.WorldOverrideSettings> entry : BetterRTP.getInstance().getSettings().getCustomWorldsByWorld().entrySet()) {
+                    Integer worldPrice = entry.getValue().getPrice();
+                    if (worldPrice != null) {
+                        prices.put(entry.getKey(), worldPrice.floatValue());
                     }
+                }
             }
         } else
             price = 0;

@@ -19,7 +19,7 @@ public class RtpEffectTitles {
         enabled = BetterRTP.getInstance().getSettings().getGeneral().getTitles().enabled;
         if (enabled)
             for (RtpTitleType type : RtpTitleType.values())
-                titles.put(type, new RtpTitle(type.path));
+                titles.put(type, new RtpTitle(type.message(BetterRTP.getInstance().getSettings().getGeneral().getTitles())));
     }
 
     public void showTitle(RtpTitleType type, Player p, Location loc, int attempts, int delay) {
@@ -48,10 +48,17 @@ public class RtpEffectTitles {
     }
 
     public enum RtpTitleType {
-        NODELAY("NoDelay"), TELEPORT("Teleport"), DELAY("Delay"), CANCEL("Cancelled"), LOADING("Loading"), FAILED("Failed");
-        final String path;
-        RtpTitleType(String path) {
-            this.path = path;
+        NODELAY, TELEPORT, DELAY, CANCEL, LOADING, FAILED;
+
+        Settings.GeneralSettings.TitleMessage message(Settings.GeneralSettings.Titles titles) {
+            return switch (this) {
+                case NODELAY -> titles.noDelay;
+                case TELEPORT -> titles.teleport;
+                case DELAY -> titles.delay;
+                case CANCEL -> titles.cancelled;
+                case LOADING -> titles.loading;
+                case FAILED -> titles.failed;
+            };
         }
     }
 

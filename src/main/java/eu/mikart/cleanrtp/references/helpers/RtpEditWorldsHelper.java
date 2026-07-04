@@ -1,17 +1,11 @@
 package eu.mikart.cleanrtp.references.helpers;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.config.Settings;
 import eu.mikart.cleanrtp.player.commands.types.CmdEdit;
 import eu.mikart.cleanrtp.references.messages.MessagesCore;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldType;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.command.CommandSender;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class RtpEditWorldsHelper {
 
@@ -32,36 +26,9 @@ public class RtpEditWorldsHelper {
         Object value = parseEditValue(sendi, cmd, val);
         if (value == null) return false;
 
-        Map<String, Settings.LocationEntry> map = BetterRTP.getInstance().getSettings().getLocations().entries;
-        boolean found = false;
-
-        // TODO: what does this do?
-        if (map.keySet().toArray()[0].equals(field)) {
-            found = true;
-            for (Object map2 : map.values()) {
-                Map<Object, Object> values = (Map<Object, Object>) map2;
-                values.put(cmd.get(), value);
-                MessagesCore.EDIT_SET.send(sendi, Argument.string("type", cmd.get()), Argument.string("value", val));
-            }
-        }
-
-        // todo fix
-        if (!found) {
-            Map<Object, Object> map2 = new HashMap<>();
-            Map<Object, Object> values = new HashMap<>();
-            values.put(cmd.get(), value);
-            map2.put(field, values);
-            map.add(map2);
-        }
-
-        // TODO: replace and save the new config
-        try {
-            config.save(file.getFile());
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+        BetterRTP.getInstance().getSettings().setLocationValue(field, cmd, value);
+        MessagesCore.EDIT_SET.send(sendi, Argument.string("type", cmd.get()), Argument.string("value", val));
+        return true;
     }
 
     public static void editPermissionGroup(CommandSender sendi, CmdEdit.RtpCmdEditSub cmd, String group, String world, String val) {

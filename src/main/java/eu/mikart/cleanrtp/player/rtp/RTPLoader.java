@@ -1,7 +1,6 @@
 package eu.mikart.cleanrtp.player.rtp;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -94,15 +93,13 @@ public class RTPLoader {
         if (!BetterRTP.getInstance().getSettings().isLocationEnabled())
             return;
         BetterRTP.debug("Loading Locations...");
-        List<Map<?, ?>> map = BetterRTP.getInstance().getSettings().getLocations().entries;
-        for (Map<?, ?> m : map)
-            for (Map.Entry<?, ?> entry : m.entrySet()) {
-                WorldLocation location = new WorldLocation(entry.getKey().toString());
-                if (location.isValid()) {
-                    worlds.put(entry.getKey().toString(), location);
-                    BetterRTP.debug("- Location '" + entry.getKey() + "' registered");
-                }
+        for (String name : BetterRTP.getInstance().getSettings().getLocations().entries.keySet()) {
+            WorldLocation location = new WorldLocation(name);
+            if (location.isValid()) {
+                worlds.put(name, location);
+                BetterRTP.debug("- Location '" + name + "' registered");
             }
+        }
     }
 
     static void loadPermissionGroups(@NotNull HashMap<String, PermissionGroup> permissionGroup) {

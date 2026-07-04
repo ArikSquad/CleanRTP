@@ -121,6 +121,14 @@ public final class Settings {
             .toList();
     }
 
+    public Map<String, WorldOverrideSettings> getCustomWorldsByWorld() {
+        Map<String, WorldOverrideSettings> flattened = new LinkedHashMap<>();
+        for (Map<String, WorldOverrideSettings> map : customWorlds) {
+            flattened.putAll(map);
+        }
+        return flattened;
+    }
+
     public Map<String, String> getOverridesByWorld() {
         return flattenStringMap(overrides);
     }
@@ -162,6 +170,31 @@ public final class Settings {
         settings.ifPresent(worldSettings -> worldSettings.set(cmd, value));
         if (settings.isPresent()) save();
         return settings.isPresent();
+    }
+
+    public void setLocationValue(String location, CmdEdit.RtpCmdEditSub cmd, Object value) {
+        locations.entries.computeIfAbsent(location, ignored -> new LocationEntry()).set(cmd, value);
+        save();
+    }
+
+    public boolean isProtocolLibSounds() {
+        return general.effects.protocolLibSound;
+    }
+
+    public boolean isLocationEnabled() {
+        return locations.enabled;
+    }
+
+    public boolean isLocationNeedPermission() {
+        return locations.requirePermission;
+    }
+
+    public boolean isUseLocationIfAvailable() {
+        return locations.useLocationIfAvailable;
+    }
+
+    public boolean isUseLocationsInSameWorld() {
+        return locations.useLocationsInSameWorld;
     }
 
     public void setWorldType(String world, String type) {
@@ -365,6 +398,20 @@ public final class Settings {
 
         @Comment("Optional")
         public float price = 0;
+
+        public void set(CmdEdit.RtpCmdEditSub cmd, Object value) {
+            switch (cmd) {
+                case CENTER_X -> centerX = (int) value;
+                case CENTER_Z -> centerZ = (int) value;
+                case MAXRAD -> maxRadius = (int) value;
+                case MINRAD -> minRadius = (int) value;
+                case MAXY -> maxY = (int) value;
+                case MINY -> minY = (int) value;
+                case PRICE -> price = ((Number) value).floatValue();
+                case SHAPE -> shape = (String) value;
+                case USEWORLDBORDER -> useWorldBorder = (boolean) value;
+            }
+        }
     }
 
     @Getter
