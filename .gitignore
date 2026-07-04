@@ -4,6 +4,8 @@ bin/
 .classpath/
 .project/
 target
+build/
+.gradle/
 .idea
 *.iml
 BetterRTP.wiki/

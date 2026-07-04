@@ -1,0 +1,13 @@
+package eu.mikart.cleanrtp.player.events.custom;
+
+import org.bukkit.command.CommandSender;
+
+import eu.mikart.cleanrtp.player.commands.RTPCommand;
+
+public class RtpCommandAfterEvent extends RtpCommandEvent {
+
+    //Executed after a command was executed
+    public RtpCommandAfterEvent(CommandSender sendi, RTPCommand cmd) {
+        super(sendi, cmd);
+    }
+}
