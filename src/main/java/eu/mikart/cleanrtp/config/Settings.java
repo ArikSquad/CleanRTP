@@ -49,8 +49,6 @@ public final class Settings {
     @Ignore
     private final SoftDepends depends = new SoftDepends();
     @Ignore
-    private boolean protocolLibSounds;
-    @Ignore
     private boolean locationEnabled;
     @Ignore
     private boolean useLocationIfAvailable;
@@ -155,10 +153,6 @@ public final class Settings {
     public void setLocationValue(String location, EditCommandSetting cmd, Object value) {
         locations.entries.computeIfAbsent(location, ignored -> new LocationEntry()).set(cmd, value);
         ConfigProvider.saveSettings();
-    }
-
-    public boolean isProtocolLibSounds() {
-        return general.effects.protocolLibSound;
     }
 
     public boolean isLocationEnabled() {
@@ -497,7 +491,6 @@ public final class Settings {
         private String particleShape = "EXPLODE";
 
         private boolean sounds = true;
-        private boolean protocolLibSound = false;
         private String delaySound = "entity.tnt.primed";
         private String successSound = "entity.generic.explode";
     }

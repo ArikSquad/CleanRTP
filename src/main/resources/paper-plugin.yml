@@ -15,9 +15,6 @@ dependencies:
         Lands: # Respect Lands areas (https://www.spigotmc.org/resources/lands.53313/)
             join-classpath: true
             required: false
-        ProtocolLib:
-            join-classpath: true
-            required: false
         Multiverse-Core:
             join-classpath: true
             required: false

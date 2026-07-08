@@ -22,45 +22,6 @@ public class HelperDate {
         return fromTo(0L, amount);
     }
 
-    /*public static void main(String[] args) {
-        long min = 0L;
-        long max = 11040000L;
-        long diffInMillies = max - min;
-        long days, hours, minutes, seconds;
-
-        days = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-        diffInMillies -= (((1000 * 60) * 60) * 24) * days;
-        hours = TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-        diffInMillies -= ((1000 * 60) * 60) * hours;
-        minutes = TimeUnit.MINUTES.convert(diffInMillies, TimeUnit.MILLISECONDS);
-        diffInMillies -= (1000 * 60) * minutes;
-        seconds = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-
-        LinkedList<String> lst = new LinkedList<>();
-        if (days > 0)
-            lst.add("{0} Days".replace("{0}", String.valueOf(days)));
-        if (hours > 0)
-            lst.add("{0} Hours".replace("{0}", String.valueOf(hours)));
-        if (minutes > 0)
-            lst.add("{0} Mins".replace("{0}", String.valueOf(minutes)));
-        if (seconds > 0)
-            lst.add("{0} Secs".replace("{0}", String.valueOf(seconds)));
-
-        StringBuilder time_str = new StringBuilder();
-
-        for (int i = 0; i < lst.size(); i++) {
-            String str = lst.get(i);
-            if (lst.size() - i - 1 >= 2) {
-                str += ", ";
-            } else if (lst.size() - 1 - i == 1) {
-                str += " and ";
-            }
-            time_str.append(str);
-        }
-
-        System.out.println(time_str);
-    }*/
-
     public static String fromTo(Long from, Long to) {
         Settings settings = BetterRTP.getInstance().getSettings();
         long min = Math.min(from, to);
@@ -90,7 +51,7 @@ public class HelperDate {
         if (seconds > 0)
             lst.add(settings.getPlaceholder_timeSeconds().replace("{0}", String.valueOf(seconds)));
 
-        StringBuilder time_str = new StringBuilder();
+        StringBuilder timeStr = new StringBuilder();
 
         for (int i = 0; i < lst.size(); i++) {
             String str = lst.get(i);
@@ -99,9 +60,9 @@ public class HelperDate {
             } else if (lst.size() - 1 - i == 1) {
                 str += settings.getPlaceholder_timeSeparator_last();
             }
-            time_str.append(str);
+            timeStr.append(str);
         }
 
-        return time_str.toString();
+        return timeStr.toString();
     }
 }
