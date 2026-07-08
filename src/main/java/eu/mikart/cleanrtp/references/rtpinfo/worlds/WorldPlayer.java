@@ -1,13 +1,13 @@
 package eu.mikart.cleanrtp.references.rtpinfo.worlds;
 
 import lombok.Getter;
-import eu.mikart.cleanrtp.player.commands.RtpSetupType;
+import eu.mikart.cleanrtp.commands.RtpSetupType;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.rtp.RTPSetupInformation;
 import eu.mikart.cleanrtp.player.rtp.RtpPlayerInfo;
 import eu.mikart.cleanrtp.player.rtp.RtpShape;
 import eu.mikart.cleanrtp.player.rtp.RtpType;
-import org.bukkit.Location;
+import lombok.Setter;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
@@ -19,9 +19,11 @@ import java.util.*;
 public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     private boolean useWorldborder, RTPOnDeath;
     private int CenterX, CenterZ, maxRad, minRad, min_y, max_y;
+    @Setter
     private float price;
     private long cooldown;
-    private List<String> Biomes;
+    @Setter
+    private List<String> biomes;
     @Getter private final Player player;
     @Getter private final CommandSender sendi;
     @Getter private final RtpPlayerInfo playerInfo;
@@ -30,6 +32,7 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     private WorldType world_type;
     @Getter
     public WorldPermissionGroup config = null;
+    @Setter
     private RtpShape shape;
     public RtpSetupType setup_type = RtpSetupType.DEFAULT;
     public String setup_name;
@@ -54,10 +57,7 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
         this.setup_name = setup_name;
         setUseWorldBorder(world.getUseWorldborder());
 
-        //BetterRTP.getInstance().getLogger().info("WorldPlayer Center x: " + CenterX);
         setCenterX(world.getCenterX());
-        //BetterRTP.getInstance().getLogger().info("set to " + world.getCenterX());
-        //BetterRTP.getInstance().getLogger().info("is now " + CenterX);
         setCenterZ(world.getCenterZ());
         setMaxRadius(world.getMaxRadius());
         setMinRadius(world.getMinRadius());
@@ -93,26 +93,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
         //Cooldown
         setCooldown(world.getCooldown());
         setup = true;
-
-        //BetterRTP.getInstance().getLogger().info("WorldPlayer Center x: " + CenterX);
-    }
-
-    public static boolean checkIsValid(Location loc, RTPWorld rtpWorld) { //Will check if a previously given location is valid
-        if (loc.getWorld() != rtpWorld.getWorld())
-            return false;
-        int _xLMax = rtpWorld.getCenterX() - rtpWorld.getMaxRadius(); //I|-||
-        int _xLMin = rtpWorld.getCenterX() - rtpWorld.getMinRadius(); //|I-||
-        int _xRMax = rtpWorld.getCenterX() + rtpWorld.getMaxRadius(); //||-|I
-        int _xRMin = rtpWorld.getCenterX() + rtpWorld.getMinRadius(); //||-I|
-        int _xLoc = loc.getBlockX();
-        if (_xLoc < _xLMax || (_xLoc > _xLMin && _xLoc < _xRMin) || _xLoc > _xRMax)
-            return false;
-        int _zLMax = rtpWorld.getCenterZ() - rtpWorld.getMaxRadius(); //I|-||
-        int _zLMin = rtpWorld.getCenterZ() - rtpWorld.getMinRadius(); //|I-||
-        int _zRMax = rtpWorld.getCenterZ() + rtpWorld.getMaxRadius(); //||-|I
-        int _zRMin = rtpWorld.getCenterZ() + rtpWorld.getMinRadius(); //||-I|
-        int _zLoc = loc.getBlockX();
-        return _zLoc >= _zLMax && (_zLoc <= _zLMin || _zLoc >= _zRMin) && _zLoc <= _zRMax;
     }
 
     @NotNull
@@ -153,7 +133,7 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
 
     @Override
     public List<String> getBiomes() {
-        return Biomes;
+        return biomes;
     }
 
     @Override
@@ -185,15 +165,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
         minRad = min;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
-    }
-
-    //
-    public void setBiomes(List<String> biomes) {
-        this.Biomes = biomes;
-    }
-
     @Override
     public void setWorld(World value) {
         //Can't override this one buddy
@@ -202,10 +173,6 @@ public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
     //Custom World type
     public void setWorldtype(WorldType type) {
         this.world_type = type;
-    }
-
-    public void setShape(RtpShape shape) {
-        this.shape = shape;
     }
 
     public void setMinY(int value) {

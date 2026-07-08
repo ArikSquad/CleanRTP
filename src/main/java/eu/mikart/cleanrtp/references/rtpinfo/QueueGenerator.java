@@ -11,10 +11,10 @@ import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.player.commands.RtpSetupType;
+import eu.mikart.cleanrtp.commands.RtpSetupType;
 import eu.mikart.cleanrtp.player.rtp.RTP;
-import eu.mikart.cleanrtp.references.database.DatabaseHandler;
-import eu.mikart.cleanrtp.references.helpers.RtpHelper;
+import eu.mikart.cleanrtp.database.DatabaseHandler;
+import eu.mikart.cleanrtp.util.RtpHelper;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldCustom;
 import eu.mikart.cleanrtp.versions.AsyncHandler;

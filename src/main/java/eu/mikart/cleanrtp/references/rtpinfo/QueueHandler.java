@@ -1,9 +1,9 @@
 package eu.mikart.cleanrtp.references.rtpinfo;
 
 import eu.mikart.cleanrtp.BetterRTP;
+import eu.mikart.cleanrtp.database.DatabaseHandler;
+import eu.mikart.cleanrtp.database.DatabaseQueue;
 import eu.mikart.cleanrtp.player.events.custom.RtpTeleportPostEvent;
-import eu.mikart.cleanrtp.references.database.DatabaseHandler;
-import eu.mikart.cleanrtp.references.database.DatabaseQueue;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 import org.bukkit.Location;

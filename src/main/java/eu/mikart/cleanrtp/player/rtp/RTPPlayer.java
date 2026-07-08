@@ -12,7 +12,7 @@ import lombok.Getter;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.events.custom.RtpFailedEvent;
 import eu.mikart.cleanrtp.player.events.custom.RtpFindLocationEvent;
-import eu.mikart.cleanrtp.references.helpers.RtpCheckHelper;
+import eu.mikart.cleanrtp.util.RtpCheckHelper;
 import eu.mikart.cleanrtp.references.rtpinfo.QueueData;
 import eu.mikart.cleanrtp.references.rtpinfo.QueueHandler;
 import eu.mikart.cleanrtp.references.rtpinfo.RandomLocation;
@@ -26,7 +26,6 @@ public class RTPPlayer {
     @Getter WorldPlayer worldPlayer;
     @Getter RtpType type;
     @Getter int attempts;
-    //List<Location> attemptedLocations = new ArrayList<>();
 
     RTPPlayer(Player player, RTP settings, WorldPlayer worldPlayer, RtpType type) {
         this.player = player;
@@ -35,16 +34,16 @@ public class RTPPlayer {
         this.type = type;
     }
 
-    void randomlyTeleport(CommandSender sendi) {
+    void randomlyTeleport(CommandSender sender) {
         if (attempts >= settings.maxAttempts) //Cancel out, too many tries
-            metMax(sendi, player);
+            metMax(sender, player);
         else { //Try again to find a safe location
             //Find a location from another Plugin
             RtpFindLocationEvent event = new RtpFindLocationEvent(this); //Find an external plugin location
             Bukkit.getServer().getPluginManager().callEvent(event);
             //Async Location finder
             if (event.isCancelled()) {
-                randomlyTeleport(sendi);
+                randomlyTeleport(sender);
                 attempts++;
                 return;
             }
@@ -67,11 +66,11 @@ public class RTPPlayer {
                         CompletableFuture<Chunk> chunk = loc.getWorld().getChunkAtAsync(loc);
                         chunk.thenAccept(_ -> {
                             //BetterRTP.debug("Checking location for " + p.getName());
-                            attempt(sendi, loc);
+                            attempt(sender, loc);
                         });
                     } catch (IllegalStateException e) {
                         //Legacy non-async support
-                        attempt(sendi, loc);
+                        attempt(sender, loc);
                     } catch (Throwable ignored) {
 
                     }
@@ -80,11 +79,11 @@ public class RTPPlayer {
         }
     }
 
-    private void attempt(CommandSender sendi, Location loc) {
+    private void attempt(CommandSender sender, Location loc) {
         Location tpLoc;
         tpLoc = RandomLocation.getSafeLocation(worldPlayer.getWorldtype(), worldPlayer.getWorld(), loc, worldPlayer.getMinY(), worldPlayer.getMaxY(), worldPlayer.getBiomes());
-        //attemptedLocations.add(loc);
-        //Valid location?
+        // attemptedLocations.add(loc);
+        // Valid location?
         if (tpLoc != null && checkDepends(tpLoc)) {
             tpLoc.add(0.5, 0, 0.5); //Center location
             if (getPl().getEco().charge(player, worldPlayer)) {
@@ -93,14 +92,14 @@ public class RTPPlayer {
                     getPl().getCooldowns().add(player, worldPlayer.getWorld());
                 tpLoc.setYaw(player.getLocation().getYaw());
                 tpLoc.setPitch(player.getLocation().getPitch());
-                AsyncHandler.sync(() -> settings.teleport.sendPlayer(sendi, player, tpLoc, worldPlayer, attempts, type));
+                AsyncHandler.sync(() -> settings.teleport.sendPlayer(sender, player, tpLoc, worldPlayer, attempts, type));
             } else {
                 if (worldPlayer.getPlayerInfo().applyCooldown)
                     getPl().getCooldowns().removeCooldown(player, worldPlayer.getWorld());
                 getPl().getPInfo().getCurrentRtp().remove(player);
             }
         } else {
-            randomlyTeleport(sendi);
+            randomlyTeleport(sender);
             QueueHandler.remove(loc);
         }
     }

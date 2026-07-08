@@ -2,7 +2,7 @@ package eu.mikart.cleanrtp.player.events.custom;
 
 import org.bukkit.command.CommandSender;
 
-import eu.mikart.cleanrtp.player.commands.CommandMeta;
+import eu.mikart.cleanrtp.commands.CommandMeta;
 
 public class RtpCommandAfterEvent extends RtpCommandEvent {
 

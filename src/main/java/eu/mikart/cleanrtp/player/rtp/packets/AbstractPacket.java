@@ -4,8 +4,10 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.google.common.base.Objects;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 
+@Getter
 public abstract class AbstractPacket {
     // The packet we will be modifying
     protected PacketContainer handle;
@@ -25,15 +27,6 @@ public abstract class AbstractPacket {
                     + " is not a packet of type " + type);
 
         this.handle = handle;
-    }
-
-    /**
-     * Retrieve a handle to the raw packet data.
-     *
-     * @return Raw packet data.
-     */
-    public PacketContainer getHandle() {
-        return handle;
     }
 
     /**

@@ -1,7 +1,7 @@
 package eu.mikart.cleanrtp.references.depends.regionplugins;
 
 import lombok.Getter;
-import eu.mikart.cleanrtp.references.settings.SoftDepends;
+import eu.mikart.cleanrtp.config.SoftDepends;
 
 @Getter
 public enum RegionPlugins {

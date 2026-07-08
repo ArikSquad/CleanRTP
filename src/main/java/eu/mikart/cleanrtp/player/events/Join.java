@@ -2,7 +2,7 @@ package eu.mikart.cleanrtp.player.events;
 
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.rtp.RtpType;
-import eu.mikart.cleanrtp.references.helpers.RtpHelper;
+import eu.mikart.cleanrtp.util.RtpHelper;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

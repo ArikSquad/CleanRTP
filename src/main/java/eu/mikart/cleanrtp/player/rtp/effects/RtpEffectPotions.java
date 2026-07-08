@@ -1,7 +1,7 @@
 package eu.mikart.cleanrtp.player.rtp.effects;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.player.HelperPlayer;
+import eu.mikart.cleanrtp.player.HelperPlayer;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;

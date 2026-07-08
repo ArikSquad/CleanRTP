@@ -3,9 +3,8 @@ package eu.mikart.cleanrtp.config;
 import de.exlll.configlib.Comment;
 import de.exlll.configlib.Configuration;
 import de.exlll.configlib.Ignore;
-import eu.mikart.cleanrtp.player.commands.EditCommandSetting;
+import eu.mikart.cleanrtp.commands.EditCommandSetting;
 import eu.mikart.cleanrtp.player.rtp.RtpShape;
-import eu.mikart.cleanrtp.references.settings.SoftDepends;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -499,8 +498,8 @@ public final class Settings {
 
         private boolean sounds = true;
         private boolean protocolLibSound = false;
-        private String delaySound = "entity_tnt_primed";
-        private String successSound = "entity_generic_explode";
+        private String delaySound = "entity.tnt.primed";
+        private String successSound = "entity.generic.explode";
     }
 
     @Getter

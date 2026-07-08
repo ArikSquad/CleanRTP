@@ -5,7 +5,6 @@ import de.exlll.configlib.NameFormatters;
 import de.exlll.configlib.YamlConfigurationProperties;
 import de.exlll.configlib.YamlConfigurations;
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.settings.SoftDepends;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 

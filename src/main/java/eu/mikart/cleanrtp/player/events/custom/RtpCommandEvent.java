@@ -1,6 +1,6 @@
 package eu.mikart.cleanrtp.player.events.custom;
 
-import eu.mikart.cleanrtp.player.commands.CommandMeta;
+import eu.mikart.cleanrtp.commands.CommandMeta;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;

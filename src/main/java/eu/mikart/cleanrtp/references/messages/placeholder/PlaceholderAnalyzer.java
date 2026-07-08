@@ -1,6 +1,6 @@
 package eu.mikart.cleanrtp.references.messages.placeholder;
 
-import eu.mikart.cleanrtp.player.commands.CommandMeta;
+import eu.mikart.cleanrtp.commands.CommandMeta;
 import eu.mikart.cleanrtp.references.PermissionCheck;
 import eu.mikart.cleanrtp.references.PermissionNode;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;

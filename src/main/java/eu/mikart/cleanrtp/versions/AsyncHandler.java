@@ -1,7 +1,6 @@
 package eu.mikart.cleanrtp.versions;
 
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.references.database.SQLite;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;

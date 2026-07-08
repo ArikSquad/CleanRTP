@@ -1,19 +1,19 @@
 package eu.mikart.cleanrtp;
 
 import eu.mikart.cleanrtp.config.ConfigProvider;
+import eu.mikart.cleanrtp.database.DatabaseHandler;
 import lombok.Getter;
 import eu.mikart.cleanrtp.player.PlayerInfo;
-import eu.mikart.cleanrtp.player.commands.CommandRegistrar;
+import eu.mikart.cleanrtp.commands.CommandRegistrar;
 import eu.mikart.cleanrtp.player.events.EventListener;
 import eu.mikart.cleanrtp.player.rtp.RTP;
 import eu.mikart.cleanrtp.references.Permissions;
 import eu.mikart.cleanrtp.references.RTPLogger;
-import eu.mikart.cleanrtp.references.database.DatabaseHandler;
 import eu.mikart.cleanrtp.references.depends.DepEconomy;
 import eu.mikart.cleanrtp.references.depends.DepMiniPlaceholders;
-import eu.mikart.cleanrtp.references.file.Files;
+import eu.mikart.cleanrtp.config.file.Files;
 import eu.mikart.cleanrtp.references.messages.MessagesCore;
-import eu.mikart.cleanrtp.references.player.playerdata.PlayerDataManager;
+import eu.mikart.cleanrtp.player.playerdata.PlayerDataManager;
 import eu.mikart.cleanrtp.references.rtpinfo.CooldownHandler;
 import eu.mikart.cleanrtp.references.rtpinfo.QueueHandler;
 import eu.mikart.cleanrtp.config.Settings;
