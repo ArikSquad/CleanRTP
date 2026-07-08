@@ -12,3 +12,4 @@ BetterRTP.wiki/
 .DS_Store
 .vscode/
 node_modules/
+run/

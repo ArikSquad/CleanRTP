@@ -5,7 +5,6 @@ import eu.mikart.cleanrtp.player.events.custom.RtpCommandAfterEvent;
 import eu.mikart.cleanrtp.player.events.custom.RtpCommandEvent;
 import eu.mikart.cleanrtp.player.rtp.RTPSetupInformation;
 import eu.mikart.cleanrtp.player.rtp.RtpPlayerInfo;
-import eu.mikart.cleanrtp.player.rtp.RtpShape;
 import eu.mikart.cleanrtp.player.rtp.RtpType;
 import eu.mikart.cleanrtp.player.rtp.effects.RtpEffectParticles;
 import eu.mikart.cleanrtp.references.PermissionCheck;
@@ -40,6 +39,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import revxrsal.commands.annotation.Command;
+import revxrsal.commands.annotation.CommandPlaceholder;
 import revxrsal.commands.annotation.Named;
 import revxrsal.commands.annotation.Optional;
 import revxrsal.commands.annotation.Subcommand;
@@ -49,11 +49,11 @@ import xyz.xenondevs.particle.ParticleEffect;
 
 @Command({"betterrtp", "brtp", "rtp", "randomtp", "wild", "wildtp"})
 @CommandPermission("betterrtp.use")
-public final class CleanRtpCommands {
+public final class RTPCommands {
 
     private static final String LABEL = "betterrtp";
 
-    @Subcommand("")
+    @CommandPlaceholder
     public void teleport(BukkitCommandActor actor) {
         run(actor.sender(), new CommandMeta("teleport", PermissionNode.USE), () -> teleport(actor.sender(), null, null));
     }
@@ -625,7 +625,7 @@ public final class CleanRtpCommands {
             }
         } else {
             list.add(0, "Command: " + cmd);
-            list.replaceAll(CleanRtpCommands::stripLegacyColor);
+            list.replaceAll(RTPCommands::stripLegacyColor);
         }
     }
 
@@ -717,7 +717,7 @@ public final class CleanRtpCommands {
             }
         } else {
             list.add(0, "Command: " + cmd);
-            list.replaceAll(CleanRtpCommands::stripLegacyColor);
+            list.replaceAll(RTPCommands::stripLegacyColor);
         }
     }
 

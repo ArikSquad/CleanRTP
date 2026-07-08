@@ -3,23 +3,19 @@ package eu.mikart.cleanrtp.config;
 import de.exlll.configlib.Comment;
 import de.exlll.configlib.Configuration;
 import de.exlll.configlib.Ignore;
-import de.exlll.configlib.YamlConfigurationProperties;
-import de.exlll.configlib.YamlConfigurations;
-import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.commands.EditCommandSetting;
 import eu.mikart.cleanrtp.player.rtp.RtpShape;
 import eu.mikart.cleanrtp.references.settings.SoftDepends;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+// this is the worst code in this project and I ADDED THIS, which is kinda cringe.
 @Getter
 @Configuration
 @SuppressWarnings({"FieldMayBeFinal", "unused"})
@@ -88,21 +84,6 @@ public final class Settings {
     @Ignore
     private String placeholder_timeSeparator_last;
 
-    public void load() {
-        File file = new File(BetterRTP.getInstance().getDataFolder(), FILE_NAME);
-        if (!file.exists()) {
-            BetterRTP.getInstance().saveResource(FILE_NAME, false);
-        }
-
-        copyFrom(YamlConfigurations.update(file.toPath(), Settings.class, Settings::configure));
-        depends.load();
-    }
-
-    public void save() {
-        File file = new File(BetterRTP.getInstance().getDataFolder(), FILE_NAME);
-        YamlConfigurations.save(file.toPath(), Settings.class, this, Settings::configure);
-    }
-
     public Optional<WorldOverrideSettings> findCustomWorld(String world) {
         return findSingletonMapValue(customWorlds, world);
     }
@@ -157,24 +138,24 @@ public final class Settings {
 
     public void setDefaultValue(EditCommandSetting cmd, Object value) {
         defaultWorld.set(cmd, value);
-        save();
+        ConfigProvider.saveSettings();
     }
 
     public void setCustomWorldValue(String world, EditCommandSetting cmd, Object value) {
         getOrCreateCustomWorld(world).set(cmd, value);
-        save();
+        ConfigProvider.saveSettings();
     }
 
     public boolean setPermissionGroupValue(String group, String world, EditCommandSetting cmd, Object value) {
         Optional<WorldOverrideSettings> settings = findPermissionGroupWorld(group, world);
         settings.ifPresent(worldSettings -> worldSettings.set(cmd, value));
-        if (settings.isPresent()) save();
+        if (settings.isPresent()) ConfigProvider.saveSettings();
         return settings.isPresent();
     }
 
     public void setLocationValue(String location, EditCommandSetting cmd, Object value) {
         locations.entries.computeIfAbsent(location, ignored -> new LocationEntry()).set(cmd, value);
-        save();
+        ConfigProvider.saveSettings();
     }
 
     public boolean isProtocolLibSounds() {
@@ -200,7 +181,7 @@ public final class Settings {
     public void setWorldType(String world, String type) {
         removeSingletonMap(worldType, world);
         worldType.add(singletonMap(world, type));
-        save();
+        ConfigProvider.saveSettings();
     }
 
     public void setOverride(String world, String target) {
@@ -208,29 +189,13 @@ public final class Settings {
         if (!"REMOVE_OVERRIDE".equals(target)) {
             overrides.add(singletonMap(world, target));
         }
-        save();
+        ConfigProvider.saveSettings();
     }
 
     public void setBlacklistedBlock(String block, boolean add) {
         blacklistedBlocks.removeIf(existing -> existing.equals(block));
         if (add) blacklistedBlocks.add(block);
-        save();
-    }
-
-    private void copyFrom(Settings loaded) {
-        general = loaded.general;
-        defaultWorld = loaded.defaultWorld;
-        blacklistedBlocks = loaded.blacklistedBlocks;
-        disabledWorlds = loaded.disabledWorlds;
-        customWorlds = loaded.customWorlds;
-        overrides = loaded.overrides;
-        worldType = loaded.worldType;
-        permissionGroup = loaded.permissionGroup;
-    }
-
-    private static void configure(YamlConfigurationProperties.Builder<?> builder) {
-        builder.charset(StandardCharsets.UTF_8);
-        builder.setNameFormatter(Settings::formatName);
+        ConfigProvider.saveSettings();
     }
 
     private static String formatName(String fieldName) {

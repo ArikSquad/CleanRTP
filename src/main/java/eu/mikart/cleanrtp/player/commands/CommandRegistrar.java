@@ -17,6 +17,6 @@ public final class CommandRegistrar {
 
     public void registerCommands() {
         lamp = BukkitLamp.builder(plugin).build();
-        lamp.register(new CleanRtpCommands());
+        lamp.register(new RTPCommands());
     }
 }

@@ -1,5 +1,6 @@
 package eu.mikart.cleanrtp;
 
+import eu.mikart.cleanrtp.config.ConfigProvider;
 import lombok.Getter;
 import eu.mikart.cleanrtp.player.PlayerInfo;
 import eu.mikart.cleanrtp.player.commands.CommandRegistrar;
@@ -29,16 +30,20 @@ public class BetterRTP extends JavaPlugin {
     @Getter private final Files files = new Files();
     @Getter private final PlayerInfo pInfo = new PlayerInfo();
     @Getter private final PlayerDataManager playerDataManager = new PlayerDataManager();
-    @Getter private final Settings settings = new Settings();
     @Getter private final CooldownHandler cooldowns = new CooldownHandler();
     @Getter private final QueueHandler queue = new QueueHandler();
     @Getter private final DatabaseHandler databaseHandler = new DatabaseHandler();
     private Runnable unregisterMiniPlaceholders = () -> {};
     @Getter private final RTPLogger rtpLogger = new RTPLogger();
 
+    public Settings getSettings() {
+        return ConfigProvider.settings;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
+        ConfigProvider.loadSettings();
         loadAll();
         cmd.registerCommands();
         listener.registerEvents(this);
@@ -72,7 +77,6 @@ public class BetterRTP extends JavaPlugin {
     private void loadAll() {
         playerDataManager.clear();
         files.loadAll();
-        settings.load();
         cooldowns.load();
         databaseHandler.load();
         rtpLogger.setup(this);

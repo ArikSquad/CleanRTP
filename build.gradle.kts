@@ -1,6 +1,7 @@
 plugins {
     java
     id("com.gradleup.shadow") version "9.3.0"
+    id("xyz.jpenilla.run-paper") version "3.0.2"
 }
 
 group = "eu.mikart.cleanrtp"
@@ -43,6 +44,14 @@ tasks {
     compileJava {
         options.encoding = "UTF-8"
         options.release.set(25)
+    }
+
+    runServer {
+        minecraftVersion("26.1.2")
+
+        downloadPlugins {
+            modrinth("viaversion", "5.10.0")
+        }
     }
 
     processResources {
