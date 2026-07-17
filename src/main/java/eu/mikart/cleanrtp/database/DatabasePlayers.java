@@ -42,25 +42,18 @@ public class DatabasePlayers extends SQLite {
     }
 
     public void setupData(PlayerData data) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("SELECT * FROM " + tables.get(0) + " WHERE " + COLUMNS.UUID.name + " = ?");
+        try (Connection conn = getSQLConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM " + quoteIdentifier(tables.getFirst())
+                     + " WHERE " + COLUMNS.UUID.name + " = ?")) {
             ps.setString(1, data.player.getUniqueId().toString());
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                long count = rs.getLong(COLUMNS.COUNT.name);
-                long time = rs.getLong(COLUMNS.LAST_COOLDOWN_DATE.name);
-                data.setRtpCount(Math.toIntExact(count));
-                data.setGlobalCooldown(time);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    data.setRtpCount(Math.toIntExact(rs.getLong(COLUMNS.COUNT.name)));
+                    data.setGlobalCooldown(rs.getLong(COLUMNS.LAST_COOLDOWN_DATE.name));
+                }
             }
         } catch (SQLException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            close(ps, rs, conn);
+            BetterRTP.getInstance().getLogger().log(Level.SEVERE, "Could not load SQLite player data", ex);
         }
     }
 
@@ -73,12 +66,7 @@ public class DatabasePlayers extends SQLite {
                 + COLUMNS.LAST_COOLDOWN_DATE.name + " "
                 //+ COLUMNS.USES.name + " "
                 + ") VALUES(?, ?, ?)";
-        List<Object> params = new ArrayList<Object>() {{
-                add(data.player.getUniqueId().toString());
-                add(data.getRtpCount());
-                add(data.getGlobalCooldown());
-                //add(data.getUses());
-        }};
+        List<Object> params = List.of(data.player.getUniqueId().toString(), data.getRtpCount(), data.getGlobalCooldown());
         sqlUpdate(sql, params);
     }
 }

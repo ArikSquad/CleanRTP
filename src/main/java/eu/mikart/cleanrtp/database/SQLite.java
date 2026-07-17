@@ -1,244 +1,133 @@
 package eu.mikart.cleanrtp.database;
 
-import lombok.NonNull;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.*;
-import java.util.Iterator;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.logging.Level;
 
+/** Shared SQLite lifecycle and update support for the plugin repositories. */
 public abstract class SQLite {
+    private static final String DATABASE_FILE = "database.db";
+    private static final String SQL_ERROR = "Could not execute SQLite statement";
 
-    private static final String db_file_name = "database";
-    List<String> tables;
-    private boolean loaded;
-
-    public String addMissingColumns = "ALTER TABLE %table% ADD COLUMN %column% %type%";
-
+    protected List<String> tables = List.of();
     private final DATABASE_TYPE type;
+    private volatile boolean loaded;
 
-    public SQLite(DATABASE_TYPE type) {
+    protected SQLite(DATABASE_TYPE type) {
         this.type = type;
     }
 
-    public abstract List<String> getTables();
+    protected abstract List<String> getTables();
 
-    // SQL creation stuff
-    public Connection getSQLConnection() {
-        return getLocal();
-    }
-
-    private Connection getLocal() {
-        File dataFolder = new File(BetterRTP.getInstance().getDataFolder().getPath() + File.separator + "data", db_file_name + ".db");
-        if (!dataFolder.exists()){
-            try {
-                dataFolder.getParentFile().mkdir();
-                dataFolder.createNewFile();
-            } catch (IOException e) {
-                BetterRTP.getInstance().getLogger().log(Level.SEVERE, "File write error: " + dataFolder.getPath());
-                e.printStackTrace();
-            }
+    protected final Connection getSQLConnection() throws SQLException {
+        File directory = new File(BetterRTP.getInstance().getDataFolder(), "data");
+        if (!directory.isDirectory() && !directory.mkdirs()) {
+            throw new SQLException("Could not create database directory " + directory);
         }
-        try {
-            Class.forName("org.sqlite.JDBC");
-            return DriverManager.getConnection("jdbc:sqlite:" + dataFolder);
-        } catch (SQLException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, "SQLite exception on initialize", ex);
-        } catch (ClassNotFoundException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, "You need the SQLite JBDC library. Google it Ronan...");
-        }
-        return null;
+        return DriverManager.getConnection("jdbc:sqlite:" + new File(directory, DATABASE_FILE));
     }
 
     public void load() {
         loaded = false;
-        tables = getTables();
-
-        // Don't do anything is no columns to generate
+        tables = List.copyOf(getTables());
         if (tables.isEmpty()) {
             loaded = true;
             return;
         }
 
         AsyncHandler.async(() -> {
-            Connection connection = getSQLConnection();
-            try {
-                Statement s = connection.createStatement();
+            try (Connection connection = getSQLConnection(); Statement statement = connection.createStatement()) {
                 for (String table : tables) {
-                    s.executeUpdate(getCreateTable(table));
-                    //s.executeUpdate(createTable_bank);
-                    for (Enum<?> c : getColumns(type)) { //Add missing columns dynamically
-                        try {
-                            String _name = getColumnName(type, c);
-                            String _type = getColumnType(type, c);
-                            //System.out.println("Adding " + _name);
-                            s.executeUpdate(addMissingColumns.replace("%table%", table).replace("%column%", _name).replace("%type%", _type));
-                        } catch (SQLException e) {
-                            //e.printStackTrace();
-                        }
-                    }
-                    BetterRTP.debug("Database " + type.name() + ":" + table + " configured and loaded!");
+                    statement.executeUpdate(createTableStatement(table));
+                    addMissingColumns(statement, table);
+                    BetterRTP.debug("Database " + type + ":" + table + " configured and loaded!");
                 }
-                s.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
+                loaded = true;
+            } catch (SQLException exception) {
+                BetterRTP.getInstance().getLogger().log(Level.SEVERE, "Could not initialize SQLite database", exception);
             }
-            initialize();
-            loaded = true;
         });
     }
 
-    private String getCreateTable(String table) {
-        String str = "CREATE TABLE IF NOT EXISTS `" + table + "` (";
-        Enum<?>[] columns = getColumns(type);
-        for (Enum<?> c : columns) {
-            String _name = getColumnName(type, c);
-            String _type = getColumnType(type, c);
-            str = str.concat("`" + _name + "` " + _type);
-            if (c.equals(columns[columns.length - 1]))
-                str = str.concat(")");
-            else
-                str = str.concat(", ");
-        }
-        //System.out.println("MySQL column string: `" + str + "`");
-        return str;
-    }
-
-    private Enum<?>[] getColumns(DATABASE_TYPE type) {
-        switch (type) {
-            case CHUNK_DATA: return DatabaseChunkData.COLUMNS.values();
-            case PLAYERS: return DatabasePlayers.COLUMNS.values();
-            case QUEUE: return DatabaseQueue.COLUMNS.values();
-            case COOLDOWN:
-            default: return DatabaseCooldowns.COLUMNS.values();
-        }
-    }
-
-    private String getColumnName(DATABASE_TYPE type, Enum<?> column) {
-        switch (type) {
-            case CHUNK_DATA: return ((DatabaseChunkData.COLUMNS) column).name;
-            case PLAYERS: return ((DatabasePlayers.COLUMNS) column).name;
-            case QUEUE: return ((DatabaseQueue.COLUMNS) column).name;
-            case COOLDOWN:
-            default: return ((DatabaseCooldowns.COLUMNS) column).name;
-        }
-    }
-
-    private String getColumnType(DATABASE_TYPE type, Enum<?> column) {
-        switch (type) {
-            case CHUNK_DATA: return ((DatabaseChunkData.COLUMNS) column).type;
-            case PLAYERS: return ((DatabasePlayers.COLUMNS) column).type;
-            case QUEUE: return ((DatabaseQueue.COLUMNS) column).type;
-            case COOLDOWN:
-            default: return ((DatabaseCooldowns.COLUMNS) column).type;
-        }
-    }
-
-    //Processing
-    protected boolean sqlUpdate(String statement, @NonNull List<Object> params) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        boolean success = true;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement(statement);
-            Iterator<Object> it = params.iterator();
-            int paramIndex = 1;
-            while (it.hasNext()) {
-                ps.setObject(paramIndex, it.next());
-                paramIndex++;
-            }
-            ps.executeUpdate();
-        } catch (SQLException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-            success = false;
-        } finally {
-            close(ps, null, conn);
-        }
-        return success;
-    }
-
-    boolean sqlUpdate(List<String> statement1, List<List<Object>> params1) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        boolean success = true;
-        try {
-            conn = getSQLConnection();
-            for (int i = 0; i < statement1.size(); i++) {
-                String statement = statement1.get(i);
-                List<Object> params = params1.get(i);
-                if (ps == null)
-                    ps = conn.prepareStatement(statement);
-                else
-                    ps.addBatch(statement);
-                if (params != null) {
-                    Iterator<Object> it = params.iterator();
-                    int paramIndex = 1;
-                    while (it.hasNext()) {
-                        ps.setObject(paramIndex, it.next());
-                        paramIndex++;
-                    }
+    private void addMissingColumns(Statement statement, String table) {
+        for (Column column : columns()) {
+            try {
+                statement.executeUpdate("ALTER TABLE " + quoteIdentifier(table) + " ADD COLUMN "
+                        + quoteIdentifier(column.name()) + " " + column.type());
+            } catch (SQLException exception) {
+                // SQLite has no ADD COLUMN IF NOT EXISTS. Ignore only duplicate-column failures.
+                if (!exception.getMessage().toLowerCase().contains("duplicate column name")) {
+                    BetterRTP.getInstance().getLogger().log(Level.WARNING,
+                            "Could not migrate SQLite table " + table + " column " + column.name(), exception);
                 }
             }
-            assert ps != null;
-            ps.executeUpdate();
-            ps.close();
-        } catch (SQLException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-            success = false;
-            ex.printStackTrace();
-        } finally {
-            close(ps, null, conn);
-        }
-        return success;
-    }
-
-    public void initialize() { //Let in console know if its all setup or not
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
-            ps = conn.prepareStatement("SELECT * FROM " + tables.get(0) + " WHERE " + getColumnName(type, getColumns(type)[0]) + " = 0");
-
-            rs = ps.executeQuery();
-        } catch (SQLException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, "Unable to retrieve connection", ex);
-        } finally {
-            close(ps, rs, conn);
         }
     }
 
-    protected void close(PreparedStatement ps, ResultSet rs, Connection conn) {
-        try {
-            if (ps != null) ps.close();
-            if (conn != null) conn.close();
-            if (rs != null) rs.close();
-        } catch (SQLException ex) {
-            Error.close(BetterRTP.getInstance(), ex);
+    private String createTableStatement(String table) {
+        return "CREATE TABLE IF NOT EXISTS " + quoteIdentifier(table) + " (" + columns().stream()
+                .map(column -> quoteIdentifier(column.name()) + " " + column.type())
+                .reduce((left, right) -> left + ", " + right)
+                .orElseThrow() + ")";
+    }
+
+    protected final boolean sqlUpdate(String sql, List<?> parameters) {
+        try (Connection connection = getSQLConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            bind(statement, parameters);
+            statement.executeUpdate();
+            return true;
+        } catch (SQLException exception) {
+            BetterRTP.getInstance().getLogger().log(Level.SEVERE, SQL_ERROR, exception);
+            return false;
         }
     }
 
-    public boolean isLoaded() {
+    protected static void bind(PreparedStatement statement, List<?> parameters) throws SQLException {
+        for (int index = 0; index < parameters.size(); index++) {
+            statement.setObject(index + 1, parameters.get(index));
+        }
+    }
+
+    protected static String quoteIdentifier(String identifier) {
+        return "`" + identifier.replace("`", "``") + "`";
+    }
+
+    public final boolean isLoaded() {
         return loaded;
     }
 
+    private List<Column> columns() {
+        return switch (type) {
+            case PLAYERS -> from(DatabasePlayers.COLUMNS.values());
+            case COOLDOWN -> from(DatabaseCooldowns.COLUMNS.values());
+            case QUEUE -> from(DatabaseQueue.COLUMNS.values());
+        };
+    }
+
+    private static List<Column> from(DatabasePlayers.COLUMNS[] values) {
+        return java.util.Arrays.stream(values).map(value -> new Column(value.name, value.type)).toList();
+    }
+
+    private static List<Column> from(DatabaseCooldowns.COLUMNS[] values) {
+        return java.util.Arrays.stream(values).map(value -> new Column(value.name, value.type)).toList();
+    }
+
+    private static List<Column> from(DatabaseQueue.COLUMNS[] values) {
+        return java.util.Arrays.stream(values).map(value -> new Column(value.name, value.type)).toList();
+    }
+
+    private record Column(String name, String type) {
+    }
+
     public enum DATABASE_TYPE {
-        PLAYERS,
-        COOLDOWN,
-        QUEUE,
-        CHUNK_DATA,
+        PLAYERS, COOLDOWN, QUEUE
     }
 }

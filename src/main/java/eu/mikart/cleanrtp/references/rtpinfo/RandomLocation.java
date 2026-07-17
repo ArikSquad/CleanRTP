@@ -3,13 +3,13 @@ package eu.mikart.cleanrtp.references.rtpinfo;
 import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.WorldType;
+import eu.mikart.cleanrtp.util.BiomeKeys;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 
 public class RandomLocation {
 
@@ -97,7 +97,7 @@ public class RandomLocation {
 
     private static Location getLocAtNether(int x, int z, int minY, int maxY, World world, List<String> biomes) {
         //Max and Min Y
-        for (int y = minY + 1; y < maxY/*world.getMaxHeight()*/; y++) {
+        for (int y = minY + 1; y < maxY; y++) {
             Block block_current = world.getBlockAt(x, y, z);
             if (block_current.getType().name().endsWith("AIR") || !block_current.getType().isSolid()) {
                 if (!block_current.getType().name().endsWith("AIR") &&
@@ -125,46 +125,12 @@ public class RandomLocation {
         //Check Biomes
         if (biomes == null || biomes.isEmpty())
             return false;
-        String biomeCurrent = world.getBiome(x, z).name();
+        String biomeCurrent = BiomeKeys.value(world.getBiome(x, world.getMinHeight(), z));
         for (String biome : biomes)
             if (biomeCurrent.toUpperCase().contains(biome.toUpperCase()))
                 return false;
         return true;
         //FALSE MEANS NO BAD BLOCKS/BIOME WHERE FOUND!
-    }
-
-    public static void runChunkTest() {
-        BetterRTP.getInstance().getLogger().info("---------------- Starting chunk test!");
-        World world = Bukkit.getWorld("world");
-        cacheChunkAt(world, 32, -32, -32, -32);
-    }
-
-    private static void cacheTask(World world, int goal, int start, int xat, int zat) {
-        zat += 1;
-        if (zat > goal) {
-            zat = start;
-            xat += 1;
-        }
-        if (xat <= goal)
-            cacheChunkAt(world, goal, start, xat, zat);
-    }
-
-    private static void cacheChunkAt(World world, int goal, int start, int xat, int zat) {
-        Location location = new Location(world, xat * 16, 0, zat * 16);
-        CompletableFuture<Chunk> task = world.getChunkAtAsync(location);
-        task.thenAccept(chunk -> {
-            try {
-                ChunkSnapshot snapshot = chunk.getChunkSnapshot(true, true, false);
-                int maxy = snapshot.getHighestBlockYAt(8, 8);
-                Biome biome = snapshot.getBiome(8, 8);
-                //BetterRTP.getInstance().getLogger().info("Added " + chunk.getX() + " " + chunk.getZ());
-                BetterRTP.getInstance().getDatabaseHandler().getDatabaseChunks().addChunk(chunk, maxy, biome);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                throw new RuntimeException();
-                //BetterRTP.getInstance().getLogger().info("Tried Adding " + chunk.getX() + " " + chunk.getZ());
-            }
-        }).thenRun(() -> cacheTask(world, goal, start, xat, zat));
     }
 
 }

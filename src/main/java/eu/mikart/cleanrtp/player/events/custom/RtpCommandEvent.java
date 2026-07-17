@@ -7,23 +7,34 @@ import org.bukkit.event.HandlerList;
 
 public class RtpCommandEvent extends RTPEvent implements Cancellable {
 
-    boolean cancelled;
-    CommandSender sendi;
-    CommandMeta cmd;
-    private static final HandlerList handler = new HandlerList();
+    private boolean cancelled;
+    private final CommandSender sender;
+    private final CommandMeta command;
 
     //Called before a command is executed
-    public RtpCommandEvent(CommandSender sendi, CommandMeta cmd) {
-        this.sendi = sendi;
-        this.cmd = cmd;
+    public RtpCommandEvent(CommandSender sender, CommandMeta command) {
+        this.sender = sender;
+        this.command = command;
     }
 
+    public CommandSender getSender() {
+        return sender;
+    }
+
+    public CommandMeta getCommand() {
+        return command;
+    }
+
+    /** @deprecated use {@link #getSender()} */
+    @Deprecated(forRemoval = true)
     public CommandSender getSendi() {
-        return sendi;
+        return sender;
     }
 
+    /** @deprecated use {@link #getCommand()} */
+    @Deprecated(forRemoval = true)
     public CommandMeta getCmd() {
-        return cmd;
+        return command;
     }
 
     @Override

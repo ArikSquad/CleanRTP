@@ -3,7 +3,9 @@ package eu.mikart.cleanrtp.player.rtp;
 import eu.mikart.cleanrtp.references.depends.regionplugins.RegionPlugins;
 import org.bukkit.Location;
 
-public class RTPPluginValidation {
+public final class RTPPluginValidation {
+    private RTPPluginValidation() {
+    }
 
     /**
      * @param loc Location to check

@@ -78,8 +78,9 @@ public class RtpEffectParticles {
                         partScan(p);
                         break;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (RuntimeException exception) {
+                BetterRTP.getInstance().getLogger().log(java.util.logging.Level.WARNING,
+                        "Could not display RTP particles for " + p.getName(), exception);
             }
         });
     }

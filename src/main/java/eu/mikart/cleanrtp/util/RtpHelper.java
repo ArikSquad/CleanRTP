@@ -183,7 +183,7 @@ public class RtpHelper {
             //Permission Group
             if (group != null) {
                 pWorld.setup(null, group, setup_info.getBiomes());
-                pWorld.config = group;
+                pWorld.setConfig(group);
             }
             //Custom World
             else if (BetterRTP.getInstance().getRTP().getRTPcustomWorld().containsKey(setup_info.getWorld().getName())) {

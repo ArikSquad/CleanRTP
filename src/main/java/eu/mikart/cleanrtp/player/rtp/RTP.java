@@ -75,7 +75,7 @@ public class RTP {
         Bukkit.getPluginManager().callEvent(setup);
         if (setup.isCancelled())
             return;
-        rtp(pWorld.getSendi(), pWorld, pWorld.getRtp_type());
+        rtp(pWorld.getSender(), pWorld, pWorld.getRtpType());
     }
 
     private void rtp(CommandSender sendi, WorldPlayer pWorld, RtpType type) {

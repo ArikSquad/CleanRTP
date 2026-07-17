@@ -242,7 +242,7 @@ public final class RTPCommands {
     @CommandPermission("betterrtp.version")
     public void version(BukkitCommandActor actor) {
         run(actor.sender(), new CommandMeta("version", PermissionNode.VERSION),
-                () -> RtpMessage.sms(actor.sender(), "&aVersion #&e" + BetterRTP.getInstance().getDescription().getVersion()));
+                () -> RtpMessage.sms(actor.sender(), "&aVersion #&e" + BetterRTP.getInstance().getPluginMeta().getVersion()));
     }
 
     @Subcommand("test")
@@ -299,8 +299,9 @@ public final class RTPCommands {
     public void infoPotionEffects(BukkitCommandActor actor) {
         run(actor.sender(), new CommandMeta("info", PermissionNode.INFO), () -> {
             List<String> info = new ArrayList<>();
-            for (PotionEffectType effect : PotionEffectType.values()) {
-                info.add((info.isEmpty() || info.size() % 2 == 0 ? "&7" : "&f") + effect.getName() + "&r");
+            for (PotionEffectType effect : org.bukkit.Registry.MOB_EFFECT) {
+                info.add((info.isEmpty() || info.size() % 2 == 0 ? "&7" : "&f")
+                        + org.bukkit.Registry.MOB_EFFECT.getKeyOrThrow(effect).asString() + "&r");
             }
             actor.sender().sendMessage(Message.component(info.toString(), actor.sender()));
         });
@@ -509,27 +510,7 @@ public final class RTPCommands {
     }
 
     private void run(CommandSender sender, CommandMeta command, Runnable action) {
-        if (!PermissionNode.USE.check(sender)) {
-            MessagesCore.NOPERMISSION.send(sender, PermissionNode.USE);
-            return;
-        }
-        if (!command.permission().check(sender)) {
-            MessagesCore.NOPERMISSION.send(sender, command.permission());
-            return;
-        }
-
-        RtpCommandEvent event = new RtpCommandEvent(sender, command);
-        Bukkit.getServer().getPluginManager().callEvent(event);
-        if (event.isCancelled()) return;
-
-        try {
-            BetterRTP.debug(sender.getName() + " executed: /" + LABEL + " " + command.name());
-            action.run();
-            Bukkit.getServer().getPluginManager().callEvent(new RtpCommandAfterEvent(sender, command));
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            RtpMessage.sms(sender, "&cERROR &7Seems like your Administrator did not update their language file!");
-        }
+        CommandExecutionService.run(sender, command, action);
     }
 
     private void teleport(CommandSender sender, World world, List<String> biomes) {
@@ -662,7 +643,7 @@ public final class RTPCommands {
                 rtpWorld = RtpHelper.getPlayerWorld(new RTPSetupInformation(world, player != null ? player : sender, player, player != null));
             }
             WorldDefault worldDefault = BetterRTP.getInstance().getRTP().getRTPdefaultWorld();
-            info.add("&7- &eSetup Type&7: " + rtpWorld.setup_type.name() + getInfo(rtpWorld, worldDefault, "setup"));
+            info.add("&7- &eSetup Type&7: " + rtpWorld.getSetupType().name() + getInfo(rtpWorld, worldDefault, "setup"));
             info.add("&7- &6Use World Border&7: " + (rtpWorld.getUseWorldborder() ? yes : no));
             info.add("&7- &eWorld Type&7: &f" + rtpWorld.getWorldtype().name());
             info.add("&7- &6Center X&7: &f" + rtpWorld.getCenterX() + getInfo(rtpWorld, worldDefault, "centerx"));
@@ -694,8 +675,8 @@ public final class RTPCommands {
             case "minrad" -> worldPlayer.getMinRadius() == worldDefault.getMinRadius() ? " &8(default)" : "";
             case "price" -> worldPlayer.getPrice() == worldDefault.getPrice() ? " &8(default)" : "";
             case "shape" -> worldPlayer.getShape() == worldDefault.getShape() ? " &8(default)" : "";
-            case "setup" -> worldPlayer.setup_type == eu.mikart.cleanrtp.commands.RtpSetupType.LOCATION
-                    ? " &7(" + worldPlayer.setup_name + ")" : "";
+            case "setup" -> worldPlayer.getSetupType() == eu.mikart.cleanrtp.commands.RtpSetupType.LOCATION
+                    ? " &7(" + worldPlayer.getSetupName() + ")" : "";
             case "cooldown" -> worldPlayer.getPlayer() != null
                     ? PermissionNode.BYPASS_COOLDOWN.check(worldPlayer.getPlayer()) ? " &8(bypassing)" : "" : " &cN/A";
             default -> "";

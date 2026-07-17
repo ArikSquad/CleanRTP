@@ -36,13 +36,8 @@ public class RTPLogger {
             handler.setFormatter(new MyFormatter());
             logger.setUseParentHandlers(toConsole); //Disable logging to console
             logger.addHandler(handler);
-            //Log copying
-            //consoleHandler_logger = new MyConsole(this.logger, plugin.getName());
-            //plugin.getLogger().addHandler(consoleHandler_logger);
-            //consoleHandler_rtp = new MyConsole(this.logger, plugin.getName());
-            //plugin.getLogger().addHandler(consoleHandler_rtp);
         } catch (IOException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(java.util.logging.Level.SEVERE, "Could not open RTP log file", e);
         }
     }
 

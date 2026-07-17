@@ -12,8 +12,9 @@ public class HuskClaimsRegion implements RegionPluginCheck {
         if (RegionPlugins.HUSK_CLAIMS.isEnabled()) {
             try {
                 result = !BukkitHuskClaimsAPI.getInstance().getClaimAt(BukkitHuskClaims.Adapter.adapt(loc)).isPresent();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (RuntimeException exception) {
+                eu.mikart.cleanrtp.BetterRTP.getInstance().getLogger().log(java.util.logging.Level.WARNING,
+                        "HuskClaims region check failed", exception);
             }
         }
         return result;

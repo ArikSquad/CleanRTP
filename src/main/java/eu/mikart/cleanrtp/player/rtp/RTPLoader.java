@@ -77,14 +77,9 @@ public class RTPLoader {
                                 "'. Valid ID's are: " + valids);
                         //Wrong rtp world type
                     }
-                //}/* else {
-                //    if (getPl().getSettings().debug)
-                //        getPl().getLogger().info("- World Type failed for '" + entry.getKey() + "' is it loaded?");
-                //}*/
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            //No World Types
+            getPl().getLogger().log(java.util.logging.Level.SEVERE, "Could not load world types", e);
         }
     }
 
