@@ -8,15 +8,16 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
-public class HelperDate {
+public final class HelperDate {
+    private HelperDate() {
+    }
 
     public static Date getDate() {
         return Calendar.getInstance().getTime();
     }
 
     public static String left(Long amount) {
-        Date current_date = HelperDate.getDate();
-        return fromTo(current_date.getTime(), amount);
+        return fromTo(System.currentTimeMillis(), amount);
     }
     public static String total(Long amount) {
         return fromTo(0L, amount);

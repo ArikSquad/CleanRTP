@@ -23,7 +23,8 @@ public class RtpInfoHelper {
             for (int i = start; i < args.length; i++) {
                 String str = args[i];
                 try {
-                    biomes.add(RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).get(Key.key(str)).name()); // TODO: pass as a Biome
+                    Biome biome = RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).get(Key.key(str));
+                    biomes.add(BiomeKeys.value(biome));
                 } catch (Exception e) {
                     if (!sentError) {
                         MessagesCore.OTHER_BIOME.send(sender, str);

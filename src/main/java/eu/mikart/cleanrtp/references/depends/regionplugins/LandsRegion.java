@@ -16,8 +16,9 @@ public class LandsRegion implements RegionPluginCheck {
         if (RegionPlugins.LANDS.isEnabled())
             try {
                 result = LandsIntegration.of(BetterRTP.getInstance()).getArea(loc) == null;
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (RuntimeException exception) {
+                BetterRTP.getInstance().getLogger().log(java.util.logging.Level.WARNING,
+                        "Lands region check failed", exception);
             }
         return result;
     }

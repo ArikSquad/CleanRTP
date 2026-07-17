@@ -90,8 +90,9 @@ public class RtpEditWorldsHelper {
         try {
             Object value = cmd.getResult(val);
             if (value != null) return value;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (RuntimeException exception) {
+            BetterRTP.getInstance().getLogger().log(java.util.logging.Level.WARNING,
+                    "Invalid value for setting " + cmd + ": " + val, exception);
         }
         MessagesCore.EDIT_ERROR.send(sendi);
         return null;

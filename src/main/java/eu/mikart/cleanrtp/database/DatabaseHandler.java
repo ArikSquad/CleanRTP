@@ -2,22 +2,17 @@ package eu.mikart.cleanrtp.database;
 
 import lombok.Getter;
 import eu.mikart.cleanrtp.BetterRTP;
-import eu.mikart.cleanrtp.versions.AsyncHandler;
 
 public class DatabaseHandler {
 
     @Getter private final DatabasePlayers databasePlayers = new DatabasePlayers();
     @Getter private final DatabaseCooldowns databaseCooldowns = new DatabaseCooldowns();
     @Getter private final DatabaseQueue databaseQueue = new DatabaseQueue();
-    @Getter private final DatabaseChunkData databaseChunks = new DatabaseChunkData();
 
     public void load() {
-        AsyncHandler.async(() -> {
-            databasePlayers.load();
-            databaseCooldowns.load();
-            databaseQueue.load();
-            databaseChunks.load();
-        });
+        databasePlayers.load();
+        databaseCooldowns.load();
+        databaseQueue.load();
     }
 
     public static DatabasePlayers getPlayers() {
@@ -31,9 +26,5 @@ public class DatabaseHandler {
     public static DatabaseQueue getQueue() {
         return BetterRTP.getInstance().getDatabaseHandler().getDatabaseQueue();
     }
-
-    //public static DatabaseChunkData getChunks() {
-    //    return BetterRTP.getInstance().getDatabaseHandler().getDatabaseChunks();
-    //}
 
 }

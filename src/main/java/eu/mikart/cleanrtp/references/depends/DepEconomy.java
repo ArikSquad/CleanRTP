@@ -28,11 +28,11 @@ public class DepEconomy {
                 boolean passed_economy = r.transactionSuccess();
                 if (!passed_economy) {
                     MessagesCore.FAILED_PRICE.send(sender, pWorld.getPrice());
-                } //else
-                    //pWorld.eco_money_taken = true;
+                }
                 return passed_economy;
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (RuntimeException exception) {
+                BetterRTP.getInstance().getLogger().log(java.util.logging.Level.WARNING,
+                        "Economy withdrawal failed for " + player.getName(), exception);
             }
         }
         //Default value
@@ -46,8 +46,9 @@ public class DepEconomy {
         if (e != null && price != 0 && !PermissionNode.BYPASS_ECONOMY.check(pWorld.getPlayer())) {
             try {
                 return e.getBalance(pWorld.getPlayer()) >= price;
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (RuntimeException exception) {
+                BetterRTP.getInstance().getLogger().log(java.util.logging.Level.WARNING,
+                        "Economy balance lookup failed for " + pWorld.getPlayer().getName(), exception);
             }
         }
         //Default value

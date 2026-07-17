@@ -33,14 +33,8 @@ public class DatabaseCooldowns extends SQLite {
         List<String> disabledWorlds = BetterRTP.getInstance().getRTP().getDisabledWorlds();
         if (disabledWorlds == null) disabledWorlds = new ArrayList<>();
 
-        // If there are disabled worlds, iterate through the loaded worlds on the server and
-        // add the world name to the list of table names if they aren't marked as disabled
-        List<World> worlds = Bukkit.getWorlds();
-        if (!disabledWorlds.isEmpty()) {
-            for (World world : worlds) {
-                if (!disabledWorlds.contains(world.getName()))
-                    list.add(world.getName());
-            }
+        for (World world : Bukkit.getWorlds()) {
+            if (!disabledWorlds.contains(world.getName())) list.add(world.getName());
         }
 
         return list;
@@ -69,71 +63,34 @@ public class DatabaseCooldowns extends SQLite {
                 world.getName(),
                 COLUMNS.UUID.name
         );
-        List<Object> params = new ArrayList<Object>() {{
-            add(uuid.toString());
-        }};
-        sqlUpdate(sql, params);
+        sqlUpdate(sql, List.of(uuid.toString()));
     }
 
     public CooldownData getCooldown(UUID uuid, World world) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getSQLConnection();
+        try (Connection conn = getSQLConnection();
             // Create prepared statement with backtick-ed table name to allow for special characters
-            ps = conn.prepareStatement(String.format(
+             PreparedStatement ps = conn.prepareStatement(String.format(
                     "SELECT * FROM `%s` WHERE %s = ?",
                     world.getName(),
                     COLUMNS.UUID.name
-            ));
+            ))) {
             ps.setString(1, uuid.toString());
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                Long time = rs.getLong(COLUMNS.COOLDOWN_DATE.name);
-                //int uses = rs.getInt(COLUMNS.USES.name);
-                return new CooldownData(uuid, time);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return new CooldownData(uuid, rs.getLong(COLUMNS.COOLDOWN_DATE.name));
             }
         } catch (SQLException ex) {
-            BetterRTP.getInstance().getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
-        } finally {
-            close(ps, rs, conn);
+            BetterRTP.getInstance().getLogger().log(Level.SEVERE, "Could not load SQLite cooldown", ex);
         }
         return null;
     }
 
     //Set a player Cooldown
     public void setCooldown(World world, CooldownData data) {
-        String pre = "INSERT OR REPLACE INTO ";
-        String sql = pre + world.getName() + " ("
+        String sql = "INSERT OR REPLACE INTO " + quoteIdentifier(world.getName()) + " ("
                 + COLUMNS.UUID.name + ", "
                 + COLUMNS.COOLDOWN_DATE.name + " "
-                //+ COLUMNS.USES.name + " "
                 + ") VALUES(?, ?)";
-        List<Object> params = new ArrayList<Object>() {{
-                add(data.getUuid().toString());
-                add(data.getTime());
-                //add(data.getUses());
-        }};
-        sqlUpdate(sql, params);
+        sqlUpdate(sql, List.of(data.getUuid().toString(), data.getTime()));
     }
 
-    //Update multiple players cooldowns
-    /*public void setCooldown(List<CooldownData> cooldownData) {
-        String pre = "INSERT OR REPLACE INTO ";
-        String sql = pre + table + " ("
-                + COLUMNS.UUID.name + ", "
-                + COLUMNS.COOLDOWN_DATE.name + ", "
-                + COLUMNS.USES.name + " "
-                + ") VALUES(?, ?, ?)";
-        for (CooldownData data : cooldownData) {
-            List<Object> param = new ArrayList<Object>() {{
-                add(data.getUuid().toString());
-                add(data.getTime());
-                add(data.getUses());
-            }};
-            sqlUpdate(sql, param);
-        }
-    }*/
 }

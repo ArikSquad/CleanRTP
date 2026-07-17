@@ -2,20 +2,27 @@ package eu.mikart.cleanrtp.player.events.custom;
 
 import org.bukkit.entity.Player;
 
-import lombok.Getter;
 import eu.mikart.cleanrtp.player.rtp.RTPPlayer;
 import eu.mikart.cleanrtp.references.rtpinfo.worlds.RTPWorld;
 
 //Called when an rtp is finding a valid location
-@Getter public class RtpFailedEvent extends RTPEvent {
+public class RtpFailedEvent extends RTPEvent {
 
-    Player p;
-    RTPWorld world;
-    int attempts;
+    private final Player player;
+    private final RTPWorld world;
+    private final int attempts;
 
     public RtpFailedEvent(RTPPlayer rtpPlayer) {
-        this.p = rtpPlayer.getPlayer();
+        this.player = rtpPlayer.getPlayer();
         this.world = rtpPlayer.getWorldPlayer();
         this.attempts = rtpPlayer.getAttempts();
     }
+
+    public Player getPlayer() { return player; }
+    public RTPWorld getWorld() { return world; }
+    public int getAttempts() { return attempts; }
+
+    /** @deprecated use {@link #getPlayer()} */
+    @Deprecated(forRemoval = true)
+    public Player getP() { return player; }
 }

@@ -16,6 +16,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import eu.mikart.cleanrtp.util.BiomeKeys;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -151,7 +152,7 @@ public class PlaceholderAnalyzer {
         } else if (info instanceof Integer integer) {
             tagIntegerAliases(builder, integer);
         } else if (info instanceof Biome biome) {
-            tag(builder, Placeholders.BIOME.key(), biome.name());
+            tag(builder, Placeholders.BIOME.key(), BiomeKeys.value(biome));
         } else if (info instanceof WorldPlayer worldPlayer) {
             tag(builder, Placeholders.PRICE.key(), worldPlayer.getPrice());
             tag(builder, Placeholders.WORLD.key(), worldPlayer.getWorld().getName());

@@ -44,6 +44,7 @@ tasks {
     compileJava {
         options.encoding = "UTF-8"
         options.release.set(25)
+        options.compilerArgs.add("-Xlint:deprecation")
     }
 
     runServer {

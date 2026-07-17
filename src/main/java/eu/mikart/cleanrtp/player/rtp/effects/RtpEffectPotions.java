@@ -4,6 +4,8 @@ import eu.mikart.cleanrtp.BetterRTP;
 import eu.mikart.cleanrtp.player.HelperPlayer;
 import eu.mikart.cleanrtp.versions.AsyncHandler;
 import org.bukkit.entity.Player;
+import org.bukkit.Registry;
+import org.bukkit.NamespacedKey;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -32,7 +34,8 @@ public class RtpEffectPotions {
             for (String p : list) {
                 String[] ary = p.replaceAll(" ", "").split(":");
                 String type = ary[0].trim();
-                PotionEffectType effect = PotionEffectType.getByName(type);
+                NamespacedKey key = NamespacedKey.fromString(type.toLowerCase(java.util.Locale.ROOT));
+                PotionEffectType effect = key == null ? null : Registry.MOB_EFFECT.get(key);
                 if (effect != null) {
                     try {
                         int duration = ary.length >= 2 ? Integer.parseInt(ary[1]) : 60;

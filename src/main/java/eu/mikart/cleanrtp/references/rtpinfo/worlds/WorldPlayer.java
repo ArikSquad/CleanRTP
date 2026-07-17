@@ -1,209 +1,106 @@
 package eu.mikart.cleanrtp.references.rtpinfo.worlds;
 
-import lombok.Getter;
-import eu.mikart.cleanrtp.commands.RtpSetupType;
 import eu.mikart.cleanrtp.BetterRTP;
+import eu.mikart.cleanrtp.commands.RtpSetupType;
 import eu.mikart.cleanrtp.player.rtp.RTPSetupInformation;
 import eu.mikart.cleanrtp.player.rtp.RtpPlayerInfo;
 import eu.mikart.cleanrtp.player.rtp.RtpShape;
 import eu.mikart.cleanrtp.player.rtp.RtpType;
-import lombok.Setter;
+import lombok.Getter;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class WorldPlayer implements RTPWorld, RtpWorldDefaulted {
-    private boolean useWorldborder, RTPOnDeath;
-    private int CenterX, CenterZ, maxRad, minRad, min_y, max_y;
-    @Setter
-    private float price;
-    private long cooldown;
-    @Setter
-    private List<String> biomes;
-    @Getter private final Player player;
-    @Getter private final CommandSender sendi;
-    @Getter private final RtpPlayerInfo playerInfo;
-    @Getter private final RtpType rtp_type;
+/** Runtime teleport context plus an immutable snapshot of its effective world settings. */
+@Getter
+public final class WorldPlayer implements RTPWorld {
+    private final Player player;
+    private final CommandSender sender;
+    private final RtpPlayerInfo playerInfo;
+    private final RtpType rtpType;
     private final World world;
-    private WorldType world_type;
-    @Getter
-    public WorldPermissionGroup config = null;
-    @Setter
-    private RtpShape shape;
-    public RtpSetupType setup_type = RtpSetupType.DEFAULT;
-    public String setup_name;
+    private WorldType worldType;
+    private WorldPermissionGroup config;
+    private RtpSetupType setupType = RtpSetupType.DEFAULT;
+    private String setupName;
+    private RtpWorldSettings settings;
 
-    @Getter private boolean setup = false;
-
-    public WorldPlayer(RTPSetupInformation setup_info) {
-        this.sendi = setup_info.getSender();
-        this.player = setup_info.getPlayer();
-        this.world = setup_info.getWorld();
-        this.rtp_type = setup_info.getRtp_type();
-        this.playerInfo = setup_info.getPlayerInfo();
+    public WorldPlayer(RTPSetupInformation setupInformation) {
+        sender = setupInformation.getSender();
+        player = setupInformation.getPlayer();
+        world = setupInformation.getWorld();
+        rtpType = setupInformation.getRtp_type();
+        playerInfo = setupInformation.getPlayerInfo();
     }
 
-    public void setup(String setup_name, RTPWorld world, List<String> biomes) {
-        if (world instanceof WorldLocation) {
-            setup_type = RtpSetupType.LOCATION;
-        } else if (world instanceof WorldCustom) {
-            setup_type = RtpSetupType.CUSTOM_WORLD;
-        } else if (world instanceof WorldPermissionGroup)
-            setup_type = RtpSetupType.PERMISSIONGROUP;
-        this.setup_name = setup_name;
-        setUseWorldBorder(world.getUseWorldborder());
+    public void setup(String name, RTPWorld source, List<String> biomeOverride) {
+        setupType = switch (source) {
+            case WorldLocation ignored -> RtpSetupType.LOCATION;
+            case WorldCustom ignored -> RtpSetupType.CUSTOM_WORLD;
+            case WorldPermissionGroup group -> {
+                config = group;
+                yield RtpSetupType.PERMISSIONGROUP;
+            }
+            default -> RtpSetupType.DEFAULT;
+        };
+        setupName = name;
 
-        setCenterX(world.getCenterX());
-        setCenterZ(world.getCenterZ());
-        setMaxRadius(world.getMaxRadius());
-        setMinRadius(world.getMinRadius());
-        setShape(world.getShape());
-        if (world instanceof WorldDefault)
-            setPrice(((WorldDefault) world).getPrice(getWorld().getName()));
-        else
-            setPrice(world.getPrice());
-        List<String> list = new ArrayList<>(world.getBiomes());
-        if (biomes != null) {
-            list.clear();
-            list.addAll(biomes);
+        int centerX = source.getCenterX();
+        int centerZ = source.getCenterZ();
+        int maxRadius = source.getMaxRadius();
+        int minRadius = source.getMinRadius();
+        if (source.getUseWorldborder()) {
+            WorldBorder border = world.getWorldBorder();
+            maxRadius = Math.min(maxRadius, (int) border.getSize() / 2);
+            centerX = border.getCenter().getBlockX();
+            centerZ = border.getCenter().getBlockZ();
         }
-        setBiomes(list);
-        //World border protection
-        if (getUseWorldborder()) {
-            WorldBorder border = getWorld().getWorldBorder();
-            int _borderRad = (int) border.getSize() / 2;
-            if (getMaxRadius() > _borderRad)
-                setMaxRadius(_borderRad);
-            setCenterX(border.getCenter().getBlockX());
-            setCenterZ(border.getCenter().getBlockZ());
+        if (maxRadius <= minRadius) {
+            minRadius = BetterRTP.getInstance().getRTP().getRTPdefaultWorld().getMinRadius();
+            if (maxRadius <= minRadius) minRadius = 0;
         }
-        //Make sure our borders will not cause an invalid integer
-        if (getMaxRadius() <= getMinRadius()) {
-            setMinRadius(BetterRTP.getInstance().getRTP().getRTPdefaultWorld().getMinRadius());
-            if (getMaxRadius() <= getMinRadius())
-                setMinRadius(0);
-        }
-        //MinY
-        setMinY(world.getMinY());
-        setMaxY(world.getMaxY());
-        //Cooldown
-        setCooldown(world.getCooldown());
-        setup = true;
+
+        float price = source instanceof WorldDefault defaultWorld
+                ? defaultWorld.getPrice(world.getName()) : source.getPrice();
+        List<String> biomes = biomeOverride == null
+                ? new ArrayList<>(source.getBiomes()) : new ArrayList<>(biomeOverride);
+        settings = RtpWorldSettings.from(source, price, biomes, centerX, centerZ, maxRadius, minRadius);
     }
 
-    @NotNull
-    @Override
-    public World getWorld() {
-        return world;
+    public boolean isSetup() {
+        return settings != null;
     }
 
-    @Override
-    public boolean getUseWorldborder() {
-        return useWorldborder;
+    public void setWorldtype(WorldType worldType) {
+        this.worldType = worldType;
     }
 
-    @Override
-    public int getCenterX() {
-        return CenterX;
+    public void setConfig(WorldPermissionGroup config) {
+        this.config = config;
     }
 
-    @Override
-    public int getCenterZ() {
-        return CenterZ;
-    }
+    // Compatibility aliases retained while internal code migrates to conventional names.
+    public CommandSender getSendi() { return sender; }
+    public RtpType getRtp_type() { return rtpType; }
+    public WorldType getWorldtype() { return worldType; }
+    public RtpSetupType getSetup_type() { return setupType; }
+    public String getSetup_name() { return setupName; }
 
-    @Override
-    public int getMaxRadius() {
-        return maxRad;
-    }
-
-    @Override
-    public int getMinRadius() {
-        return minRad;
-    }
-
-    @Override
-    public float getPrice() {
-        return price;
-    }
-
-    @Override
-    public List<String> getBiomes() {
-        return biomes;
-    }
-
-    @Override
-    public RtpShape getShape() {
-        return shape;
-    }
-
-    @Override
-    public void setUseWorldBorder(boolean bool) {
-        useWorldborder = bool;
-    }
-
-    @Override
-    public void setCenterX(int x) {
-        CenterX = x;
-    }
-
-    @Override
-    public void setCenterZ(int z) {
-        CenterZ = z;
-    }
-
-    //Modifiable
-    public void setMaxRadius(int max) {
-        maxRad = max;
-    }
-
-    public void setMinRadius(int min) {
-        minRad = min;
-    }
-
-    @Override
-    public void setWorld(World value) {
-        //Can't override this one buddy
-    }
-
-    //Custom World type
-    public void setWorldtype(WorldType type) {
-        this.world_type = type;
-    }
-
-    public void setMinY(int value) {
-        this.min_y = value;
-    }
-
-    public void setMaxY(int value) {
-        this.max_y = value;
-    }
-
-    @Override
-    public void setCooldown(long value) {
-        this.cooldown = value;
-    }
-
-    public WorldType getWorldtype() {
-        return this.world_type;
-    }
-
-    public int getMinY() {
-        return min_y;
-    }
-
-    @Override
-    public int getMaxY() {
-        return max_y;
-    }
-
-    @Override
-    public long getCooldown() {
-        return cooldown;
-    }
-
+    @NotNull @Override public World getWorld() { return world; }
+    @Override public boolean getUseWorldborder() { return settings.useWorldBorder(); }
+    @Override public int getCenterX() { return settings.centerX(); }
+    @Override public int getCenterZ() { return settings.centerZ(); }
+    @Override public int getMaxRadius() { return settings.maxRadius(); }
+    @Override public int getMinRadius() { return settings.minRadius(); }
+    @Override public float getPrice() { return settings.price(); }
+    @Override public List<String> getBiomes() { return settings.biomes(); }
+    @Override public RtpShape getShape() { return settings.shape(); }
+    @Override public int getMinY() { return settings.minY(); }
+    @Override public int getMaxY() { return settings.maxY(); }
+    @Override public long getCooldown() { return settings.cooldown(); }
 }

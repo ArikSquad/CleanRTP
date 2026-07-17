@@ -105,7 +105,7 @@ public class QueueGenerator {
             }
             generating = false;
             BetterRTP.debug("Queueing paused, max queue limit reached!");
-        }, 20L/*delay before starting queue generator*/);
+        }, 20L);
     }
 
     static class ReQueueData {

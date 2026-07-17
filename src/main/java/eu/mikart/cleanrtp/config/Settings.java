@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-// this is the worst code in this project and I ADDED THIS, which is kinda cringe.
 @Getter
 @Configuration
 @SuppressWarnings({"FieldMayBeFinal", "unused"})
